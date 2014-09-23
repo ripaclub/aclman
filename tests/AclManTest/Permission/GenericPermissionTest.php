@@ -33,7 +33,7 @@ class GenericPermissionTest extends AclManTestCase
         $this->assertSame('role1', $this->permission->getRoleId());
         $this->assertSame('resource2', $this->permission->getResourceId());
         $this->assertTrue($this->permission->isAllow());
-        $this->assertSame('test', $this->permission->getAssertionClass());
+        $this->assertSame('test', $this->permission->getAssertion());
 
         $options = [
             'resource'  => 'resource2',
@@ -48,7 +48,7 @@ class GenericPermissionTest extends AclManTestCase
         $this->assertSame('role1', $this->permission->getRoleId());
         $this->assertSame('resource2', $this->permission->getResourceId());
         $this->assertFalse($this->permission->isAllow());
-        $this->assertSame('test', $this->permission->getAssertionClass());
+        $this->assertSame('test', $this->permission->getAssertion());
         $this->assertSame('add', $this->permission->getPrivilege());
 
     }

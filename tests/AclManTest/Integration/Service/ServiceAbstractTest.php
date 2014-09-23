@@ -62,9 +62,9 @@ class ServiceAbstractTest extends AclManTestCase
         $this->service->setStorage($this->setUpArrayObjectStorage());
         $this->service->init();
 
-        var_dump($this->service->isAllowed('admin', 'resource3'));
-        var_dump($this->service->isAllowed('admin', 'resource3', 'adminEdit'));
-        var_dump($this->service->isAllowed('moderator', 'resource3'));
-        var_dump($this->service->isAllowed('moderator', 'resource3', 'add'));
+        //var_dump($this->service->isAllowed('admin', 'resource3'));
+        //var_dump($this->service->isAllowed('admin', 'resource3', 'adminEdit'));
+        //var_dump($this->service->isAllowed('moderator', 'resource3'));
+        //var_dump($this->service->isAllowed('moderator', 'resource3', 'add'));
     }
 } 

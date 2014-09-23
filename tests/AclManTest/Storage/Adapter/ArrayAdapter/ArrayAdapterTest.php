@@ -34,7 +34,13 @@ class ArrayAdapterTest extends AclManTestCase
             'roles' => [
                 $role1,
                 $role2,
-                $role3
+                [
+                    'role' => $role3,
+                    'parents' => [
+                        $role2,
+                        $role1
+                    ],
+                ]
             ],
             'resources' => [
                 $resource1,
@@ -95,6 +101,20 @@ class ArrayAdapterTest extends AclManTestCase
     {
         $roles =  $this->adapter->getRoles();
         $this->assertCount(3, $roles);
+    }
+
+    public function testGetParentRoles()
+    {
+        $roles =  $this->adapter->getParentRoles('role3');
+        $this->assertCount(2, $roles);
+    }
+
+    /**
+     * @expectedException \AclMan\Storage\Exception\RoleNotExistException
+     */
+    public function testGetParentRolesException()
+    {
+        $roles =  $this->adapter->getParentRoles('role5');
     }
 
     /**
@@ -189,22 +209,6 @@ class ArrayAdapterTest extends AclManTestCase
                 'role'     => 'role10',
                 'resource' => 'resource3',
                 'allow'    => 'true'
-            ]
-        );
-
-        $this->adapter->addPermission($permission);
-    }
-
-    /**
-     * @expectedException \AclMan\Storage\Exception\InvalidParameterException
-     */
-    public function testAddPermissionAssertException()
-    {
-        $permission = new GenericPermission([
-                'role'     => 'role1',
-                'resource' => 'resource3',
-                'allow'    => true,
-                'assert'   => 'test'
             ]
         );
 

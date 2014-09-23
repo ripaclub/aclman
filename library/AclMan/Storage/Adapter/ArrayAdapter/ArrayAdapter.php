@@ -72,25 +72,36 @@ class ArrayAdapter implements StorageInterface
     public function addRoles(array $roles)
     {
         foreach ($roles as $role) {
-            $this->addRole($role);
+
+            $parents = [];
+            if (is_array($role) && isset($role['parents'])) {
+                $parents = $role['parents'];
+            }
+
+            if (is_array($role) && isset($role['role'])) {
+                $role = $role['role'];
+            }
+
+            $this->addRole($role, $parents);
         }
         return $this;
     }
 
     /**
      * @param RoleInterface $role
+     * @param array $parents
      * @return $this|bool
      * @throws \AclMan\Storage\Exception\RoleAlreadyExistException
-     * @throws \AclMan\Storage\Exception\InvalidParameterException
      */
-    public function addRole($role)
+    public function addRole($role, array $parents = [])
     {
         $role = $this->checkRole($role);
 
         if($this->hasRole($role)) {
             throw new RoleAlreadyExistException(sprintf('Role %s already stored', $role->getRoleId()));
         }
-        $this->roles[$role->getRoleId()] = [];
+
+        $this->roles[$role->getRoleId()] = $this->extractRoleParents($parents);
         return $this;
     }
 
@@ -105,6 +116,24 @@ class ArrayAdapter implements StorageInterface
             array_push($roles, new GenericRole($role));
         }
         return $roles;
+    }
+
+    /**
+     * @param $role
+     * @return array
+     * @throws \AclMan\Storage\Exception\RoleNotExistException
+     */
+    public function getParentRoles($role)
+    {
+        $role = $this->checkRole($role);
+
+        $roleId = $role->getRoleId();
+        if (array_key_exists($roleId, $this->roles)) {
+            return $this->roles[$roleId];
+        }
+        else{
+            throw new RoleNotExistException(sprintf('Role %s not stored', $roleId));
+        }
     }
 
     /**
@@ -258,26 +287,19 @@ class ArrayAdapter implements StorageInterface
             throw new RoleNotExistException(sprintf('Role %s not stored', $permission->getRoleId()));
         }
 
-        $assert = $permission->getAssertionClass();
+        $permissionSettings =  [
+            'role'   => $permission->getRoleId(),
+            'assert' => $permission->getAssertion(),
+            'allow'  => $permission->isAllow(),
+            'privilege'  => $permission->getPrivilege()
+        ];
 
-        if($assert instanceof AssertionInterface || is_null($assert)) {
-
-            $permissionSettings =  [
-                'role'   => $permission->getRoleId(),
-                'assert' => $permission->getAssertionClass(),
-                'allow'  => $permission->isAllow(),
-                'privilege'  => $permission->getPrivilege()
-            ];
-
-            if(isset($this->resources[$permission->getResourceId()][self::NODE_PERMISSION])) {
-                array_push($this->resources[$permission->getResourceId()][self::NODE_PERMISSION], $permissionSettings);
-            } else {
-                $this->resources[$permission->getResourceId()][self::NODE_PERMISSION][] = $permissionSettings;
-            }
-            return $this;
+        if(isset($this->resources[$permission->getResourceId()][self::NODE_PERMISSION])) {
+            array_push($this->resources[$permission->getResourceId()][self::NODE_PERMISSION], $permissionSettings);
         } else {
-            throw new InvalidParameterException('Invalid type assert');
+            $this->resources[$permission->getResourceId()][self::NODE_PERMISSION][] = $permissionSettings;
         }
+        return $this;
     }
 
     /**
@@ -291,5 +313,19 @@ class ArrayAdapter implements StorageInterface
             $this->addPermission($permission);
         }
         return $this;
+    }
+
+    /**
+     * @param array $parents
+     * @return array
+     */
+    protected function extractRoleParents(array $parents)
+    {
+        $roleParents = [];
+        foreach ($parents as $parent) {
+            $role = $this->checkRole($parent);
+            array_push($roleParents, $role->getRoleId());
+        }
+        return $roleParents;
     }
 } 

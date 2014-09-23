@@ -73,7 +73,7 @@ class GenericPermission implements PermissionInterface
             }
 
             if(isset($options['assert'])) {
-                $this->assert = $options['assert'];
+                $this->setAssertion($options['assert']);
             }
         }
     }
@@ -97,9 +97,19 @@ class GenericPermission implements PermissionInterface
     /**
      * @return mixed
      */
-    public function getAssertionClass()
+    public function getAssertion()
     {
         return $this->assert;
+    }
+
+    /**
+     * @param $assert
+     * @return self
+     */
+    public function setAssertion($assert)
+    {
+        $this->assert = $assert;
+        return $this;
     }
 
     /**

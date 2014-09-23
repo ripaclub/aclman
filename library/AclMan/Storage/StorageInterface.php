@@ -13,10 +13,17 @@ interface StorageInterface
     public function getRoles();
 
     /**
+     * @param $role
+     * @return array
+     */
+    public function getParentRoles($role);
+
+    /**
      * @param RoleInterface $role
+     * @param array $parents
      * @return bool
      */
-    public function addRole($role);
+    public function addRole($role, array $parents = []);
 
     /**
      * @param RoleInterface $role

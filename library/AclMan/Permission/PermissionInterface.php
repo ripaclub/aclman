@@ -13,7 +13,13 @@ use Zend\Permissions\Acl\Role\RoleInterface;
 
 interface PermissionInterface extends ResourceInterface, RoleInterface
 {
-    public function getAssertionClass();
+    /**
+     * METHOD
+     ******************************************************************************************************************/
+
+    public function getAssertion();
+
+    public function setAssertion($assert);
 
     public function isAllow();
 

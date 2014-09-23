@@ -24,7 +24,7 @@ class ServiceAbstract implements ServiceInterface
      * ATTRIBUTE
      ******************************************************************************************************************/
 
-    protected $allowNotFoundResource = true;
+    protected $allowNotFoundResource = false;
 
     /**
      * METHOD
@@ -41,7 +41,8 @@ class ServiceAbstract implements ServiceInterface
             // Add Role
             $roles = $this->getStorage()->getRoles();
             foreach ($roles as $role) {
-                $this->getAcl()->addRole($role);
+                $roleParents = $this->getStorage()->getParentRoles($role);
+                $this->getAcl()->addRole($role, $roleParents);
             }
         }
         return $this;
@@ -97,25 +98,39 @@ class ServiceAbstract implements ServiceInterface
     {
         $resource = $this->checkResource($resource);
 
-        if($this->getAcl()->hasResource($resource)) {
-            return false;
-        } else {
+        if($this->getStorage()->hasResource($resource) && !$this->getAcl()->hasResource($resource)) {
             $this->getAcl()->addResource($resource);
-            $roles = $this->getRoles();
+            //$roles = $this->getRoles();
+
             $permissions = $this->getStorage()->getPermissions($resource);
             /* @var $permission \AclMan\Permission\GenericPermission */
             foreach($permissions as $permission) {
+                $assert = null;
+                if ($permission->getAssertion()) {
+                    $assert = $this->getPluginManager()->get($permission->getAssertion());
+                }
+
                 if($permission->isAllow()) {
                     //var_dump(sprintf('ALLOW: role %s resource %s privilege %s', ucfirst($permission->getRoleId()), ucfirst($permission->getResourceId()), $permission->getPrivilege()));
-                    $this->getAcl()->allow($permission->getRoleId(), $permission->getResourceId(), $permission->getPrivilege());
+                    $this->getAcl()->allow(
+                        $permission->getRoleId(),
+                        $permission->getResourceId(),
+                        $permission->getPrivilege(),
+                        $assert
+                    );
                 } else {
-                        //var_dump(sprintf('DENY: role %s resource %s privilege %s', ucfirst($permission->getRoleId()), ucfirst($permission->getResourceId()), $permission->getPrivilege()));
-                    $this->getAcl()->deny($permission->getRoleId(), $permission->getResourceId(), $permission->getPrivilege());
+                    //var_dump(sprintf('DENY: role %s resource %s privilege %s', ucfirst($permission->getRoleId()), ucfirst($permission->getResourceId()), $permission->getPrivilege()));
+                    $this->getAcl()->deny(
+                        $permission->getRoleId(),
+                        $permission->getResourceId(),
+                        $permission->getPrivilege(),
+                        $assert
+                    );
                 }
             }
-
             return true;
         }
+        return false;
     }
 
     /**
