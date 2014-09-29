@@ -2,6 +2,7 @@
 namespace AclMan\Storage\Adapter\ArrayAdapter;
 
 use AclMan\Permission\GenericPermission;
+use AclMan\Permission\PermissionCheckTrait;
 use AclMan\Permission\PermissionInterface;
 use AclMan\Resource\ResourceCheckTrait;
 use AclMan\Role\RoleCheckTrait;
@@ -25,14 +26,7 @@ class ArrayAdapter implements StorageInterface
 
     use RoleCheckTrait;
     use ResourceCheckTrait;
-
-    /**
-     * CONST
-     ******************************************************************************************************************/
-
-    const NODE_ROLES       = 'roles';
-    const NODE_RESOURCES   = 'resources';
-    const NODE_PERMISSION  = 'permission';
+    use PermissionCheckTrait;
 
     /**
      * ATTRIBUTE
@@ -42,6 +36,8 @@ class ArrayAdapter implements StorageInterface
 
     public $resources = [];
 
+    public $permission = [];
+
     /**
      * METHOD
      ******************************************************************************************************************/
@@ -49,18 +45,27 @@ class ArrayAdapter implements StorageInterface
     /**
      * @param array $config
      */
-    function __construct(array $config)
+    function __construct($config = null)
     {
-        if(isset($config[self::NODE_ROLES])) {
-            $this->addRoles($config[self::NODE_ROLES]);
-        }
-
-        if(isset($config[self::NODE_RESOURCES])) {
-            $this->addResources($config[self::NODE_RESOURCES]);
-        }
-
-        if(isset($config[self::NODE_PERMISSION])) {
-            $this->addPermissions($config[self::NODE_PERMISSION]);
+        if (is_array($config) && isset($config[self::NODE_ROLES])) {
+            foreach ($config[self::NODE_ROLES] as $role => $resources) {
+                $parents = (isset($resources['parents'])) ? $resources['parents'] : [];
+                $this->addRole($role, $parents);
+                if (is_array($resources) && isset($resources[self::NODE_RESOURCES])) {
+                    foreach ($resources[self::NODE_RESOURCES] as $resource => $permissions) {
+                        if (!$this->hasResource($resource)) {
+                            $this->addResource($resource);
+                        }
+                        if (is_array($permissions)) {
+                            foreach ($permissions as $permission) {
+                                $permission['role'] =$role;
+                                $permission['resource'] = $resource;
+                                $this->addPermission($permission);
+                            }
+                        }
+                    }
+                }
+            }
         }
     }
 
@@ -72,7 +77,6 @@ class ArrayAdapter implements StorageInterface
     public function addRoles(array $roles)
     {
         foreach ($roles as $role) {
-
             $parents = [];
             if (is_array($role) && isset($role['parents'])) {
                 $parents = $role['parents'];
@@ -80,8 +84,9 @@ class ArrayAdapter implements StorageInterface
 
             if (is_array($role) && isset($role['role'])) {
                 $role = $role['role'];
+            } else {
+                $role = $this->checkRole($role);
             }
-
             $this->addRole($role, $parents);
         }
         return $this;
@@ -101,7 +106,9 @@ class ArrayAdapter implements StorageInterface
             throw new RoleAlreadyExistException(sprintf('Role %s already stored', $role->getRoleId()));
         }
 
-        $this->roles[$role->getRoleId()] = $this->extractRoleParents($parents);
+        $this->roles[$role->getRoleId()][self::NODE_PARENTS_ROLE] = $this->extractRoleParents($parents);
+        $this->permission[$role->getRoleId()][self::NODE_RESOURCES] = [];
+
         return $this;
     }
 
@@ -119,24 +126,6 @@ class ArrayAdapter implements StorageInterface
     }
 
     /**
-     * @param $role
-     * @return array
-     * @throws \AclMan\Storage\Exception\RoleNotExistException
-     */
-    public function getParentRoles($role)
-    {
-        $role = $this->checkRole($role);
-
-        $roleId = $role->getRoleId();
-        if (array_key_exists($roleId, $this->roles)) {
-            return $this->roles[$roleId];
-        }
-        else{
-            throw new RoleNotExistException(sprintf('Role %s not stored', $roleId));
-        }
-    }
-
-    /**
      * @param RoleInterface $role
      * @return bool
      * @throws \AclMan\Storage\Exception\InvalidParameterException
@@ -149,6 +138,65 @@ class ArrayAdapter implements StorageInterface
             return true;
         }
         return false;
+    }
+
+    /**
+     * @param $role
+     * @param array $parents
+     * @return bool
+     * @throws \AclMan\Storage\Exception\RoleNotExistException
+     */
+    public function addParentRoles($role, array $parents)
+    {
+        $role = $this->checkRole($role);
+        $roleId = $role->getRoleId();
+        if ($this->hasRole($roleId)) {
+            foreach ($parents as $parent) {
+                $parent = $this->checkRole($parent);
+                $parentId = $parent->getRoleId();
+                if ($this->hasRole($parentId)) {
+                    array_push($this->roles[$roleId][self::NODE_PARENTS_ROLE], $parentId );
+                } else {
+                    throw new RoleNotExistException(sprintf('Role parent %s not stored', $roleId));
+                }
+            }
+            return true;
+        }
+        else {
+            throw new RoleNotExistException(sprintf('Role %s not stored', $roleId));
+        }
+    }
+
+
+    /**
+     * @param $role
+     * @return array
+     * @throws \AclMan\Storage\Exception\RoleNotExistException
+     */
+    public function getParentRoles($role)
+    {
+        $role = $this->checkRole($role);
+        $roleId = $role->getRoleId();
+        if (array_key_exists($roleId, $this->roles)) {
+            return $this->roles[$roleId][self::NODE_PARENTS_ROLE];
+        }
+        else{
+            throw new RoleNotExistException(sprintf('Role %s not stored', $roleId));
+        }
+    }
+
+    /**
+     * @param array $parents
+     * @return array
+     */
+    protected function extractRoleParents(array $parents)
+    {
+        $roleParents = [];
+        foreach ($parents as $parent) {
+            $role = $this->checkRole($parent);
+            array_push($roleParents, $role->getRoleId());
+        }
+        return $roleParents;
     }
 
     /**
@@ -196,20 +244,6 @@ class ArrayAdapter implements StorageInterface
     }
 
     /**
-     * @param string $resource
-     * @return null|string|GenericResource|ResourceInterface
-     */
-    public function getResource($resource)
-    {
-        $resource = $this->checkResource($resource);
-
-        if($this->hasResource($resource)) {
-            return $resource;
-        }
-        return null;
-    }
-
-    /**
      * @param ResourceInterface $resource
      * @return bool
      */
@@ -224,45 +258,44 @@ class ArrayAdapter implements StorageInterface
     }
 
     /**
-     * @param $permission
-     * @return GenericPermission
-     * @throws \AclMan\Storage\Exception\InvalidParameterException
-     */
-    private function checkPermission($permission)
-    {
-        if(is_array($permission)) {
-            $permission = new GenericPermission($permission);
-        }
-
-        if(!($permission instanceof PermissionInterface)){
-            throw new InvalidParameterException('Invalid type permission');
-        }
-
-        return $permission;
-    }
-
-    /**
-     * @param ResourceInterface $resource
+     * @param null $role
+     * @param null $resource
      * @return array
      * @throws \AclMan\Storage\Exception\ResourceNotExistException
      */
-    public function getPermissions($resource)
+    public function getPermissions($role = null, $resource = null)
     {
-        $permission = $this->checkResource($resource);
-
-        if(!$this->hasResource($resource)) {
-            throw new ResourceNotExistException(sprintf('Resource %s not stored', $resource->getResourceId()));
-        }
-
+        $role = $this->getRolePermission(new GenericPermission(['role' => $role]));
         $result = [];
-        if(isset($this->resources[$resource->getResourceId()][self::NODE_PERMISSION])) {
-            $listPermission = $this->resources[$resource->getResourceId()][self::NODE_PERMISSION];
-            foreach ($listPermission as $permission) {
 
-                $obj = new GenericPermission(array_merge($permission, ['resource' => $resource->getResourceId()]));
-                array_push($result, $obj);
+        if ($resource) {
+            $resource = $this->checkResource($resource);
+            if(isset($this->permission[$role->getRoleId()][self::NODE_RESOURCES][$resource->getResourceId()][self::NODE_PERMISSION])) {
+                $listPermission = $this->permission[$role->getRoleId()][self::NODE_RESOURCES][$resource->getResourceId()][self::NODE_PERMISSION];
+                foreach ($listPermission as $permission) {
+
+                    $permission['role'] = $role->getRoleId();
+                    $permission['resource'] = $resource->getResourceId();
+
+                    $obj = new GenericPermission($permission);
+                    array_push($result, $obj);
+                }
+
             }
+        } else {
+            if(isset($this->permission[$role->getRoleId()][self::NODE_RESOURCES])) {
+                $listResource = $this->permission[$role->getRoleId()][self::NODE_RESOURCES];
+                foreach ($listResource as $keyResource => $listPermission) {
+                    foreach ($listPermission[self::NODE_PERMISSION] as $permission) {
 
+                        $permission['role'] = $role->getRoleId();
+                        $permission['resource'] = ($keyResource != self::ALL_RESOURCES) ? $keyResource : null;
+
+                        $obj = new GenericPermission($permission);
+                        array_push($result, $obj);
+                    }
+                }
+            }
         }
 
         return $result;
@@ -279,26 +312,19 @@ class ArrayAdapter implements StorageInterface
     {
         $permission = $this->checkPermission($permission);
 
-        if(!$this->hasResource(new GenericResource($permission->getResourceId()))) {
-            throw new ResourceNotExistException(sprintf('Resource %s not stored', $permission->getResourceId()));
-        }
+        $role = $this->getRolePermission($permission);
+        $resource = $this->getResourcePermission($permission);
 
-        if(!$this->hasRole(new GenericRole($permission->getRoleId()))) {
-            throw new RoleNotExistException(sprintf('Role %s not stored', $permission->getRoleId()));
-        }
+        $this->checkRoleResource($role, $resource);
 
-        $permissionSettings =  [
-            'role'   => $permission->getRoleId(),
+        $newPermission = [
             'assert' => $permission->getAssertion(),
             'allow'  => $permission->isAllow(),
             'privilege'  => $permission->getPrivilege()
         ];
 
-        if(isset($this->resources[$permission->getResourceId()][self::NODE_PERMISSION])) {
-            array_push($this->resources[$permission->getResourceId()][self::NODE_PERMISSION], $permissionSettings);
-        } else {
-            $this->resources[$permission->getResourceId()][self::NODE_PERMISSION][] = $permissionSettings;
-        }
+        array_push($this->permission[$role->getRoleId()][self::NODE_RESOURCES][$resource->getResourceId()][self::NODE_PERMISSION], $newPermission);
+
         return $this;
     }
 
@@ -316,16 +342,58 @@ class ArrayAdapter implements StorageInterface
     }
 
     /**
-     * @param array $parents
-     * @return array
+     * @param GenericPermission $permission
+     * @return GenericRole
+     * @throws \AclMan\Storage\Exception\RoleNotExistException
      */
-    protected function extractRoleParents(array $parents)
+    protected  function getRolePermission(GenericPermission $permission)
     {
-        $roleParents = [];
-        foreach ($parents as $parent) {
-            $role = $this->checkRole($parent);
-            array_push($roleParents, $role->getRoleId());
+        if($permission->getRoleId()) {
+            if (!$this->hasRole(new GenericRole($permission->getRoleId()))) {
+                throw new RoleNotExistException(sprintf('Role %s not stored', $permission->getRoleId()));
+            }
+            $role = new GenericRole($permission->getRoleId());
+        } else {
+            $role = new GenericRole(self::ALL_ROLES);
         }
-        return $roleParents;
+
+        return $role;
+    }
+
+    /**
+     * @param GenericPermission $permission
+     * @return GenericResource
+     * @throws \AclMan\Storage\Exception\ResourceNotExistException
+     */
+    protected  function getResourcePermission(GenericPermission $permission)
+    {
+        if ($permission->getResourceId()) {
+            // Check if resource is already stored
+            if(!$this->hasResource(new GenericResource($permission->getResourceId()))) {
+                throw new ResourceNotExistException(sprintf('Resource %s not stored', $permission->getResourceId()));
+            }
+            $resource = new GenericResource($permission->getResourceId());
+        } else {
+            $resource = new GenericResource(self::ALL_RESOURCES);
+        }
+        return $resource;
+    }
+
+    /**
+     * Check if already exists a resource permission node config, if not exist add it
+     *
+     * @param $role
+     * @param $resource
+     * @return self
+     */
+    protected function checkRoleResource($role, $resource)
+    {
+        $resource = $this->checkResource($resource);
+        $role = $this->checkRole($role);
+
+        if(!isset($this->permission[$role->getRoleId()][self::NODE_RESOURCES][$resource->getResourceId()][self::NODE_PERMISSION])) {
+            $this->permission[$role->getRoleId()][self::NODE_RESOURCES][$resource->getResourceId()][self::NODE_PERMISSION] = [];
+        }
+        return $this;
     }
 } 

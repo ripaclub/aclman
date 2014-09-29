@@ -19,6 +19,6 @@ interface ServiceInterface extends AclInterface
      * @param ResourceInterface $resource
      * @return bool
      */
-    public function loadResource($resource);
+    public function loadResource($role = null, $resource = null);
 
 } 

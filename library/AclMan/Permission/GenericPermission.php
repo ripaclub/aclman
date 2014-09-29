@@ -157,6 +157,4 @@ class GenericPermission implements PermissionInterface
         $this->privilege = $privilege;
         return $this;
     }
-
-
-} 
+}

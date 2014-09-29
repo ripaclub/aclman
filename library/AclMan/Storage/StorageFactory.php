@@ -1,26 +1,30 @@
 <?php
-/**
- * Created by visa
- * Date:  7/29/14 6:53 PM
- * Class: ArrayAdapterAbstractServiceFactory.php
- */
-
-namespace AclMan\Storage\Adapter\ArrayAdapter;
+namespace AclMan\Storage;
 
 use Zend\ServiceManager\AbstractFactoryInterface;
 use Zend\ServiceManager\ServiceLocatorInterface;
 
-class ArrayAdapterAbstractServiceFactory implements AbstractFactoryInterface
+class StorageFactory implements AbstractFactoryInterface
 {
     /**
+     * Config Key
      * @var string
      */
-    protected $configKey = 'aclManArrayAdapterStorage';
+    protected $configKey = 'aclman_storage';
 
     /**
+     * Config
      * @var array
      */
     protected $config;
+
+    /**
+     * Default service class name
+     *
+     * @var string
+     */
+    protected $serviceName = 'AclMan\Storage\Adapter\ArrayAdapter\ArrayAdapter';
+
     /**
      * Determine if we can create a service with name
      *
@@ -38,10 +42,6 @@ class ArrayAdapterAbstractServiceFactory implements AbstractFactoryInterface
 
         return (
             isset($config[$requestedName])
-            && is_array($config[$requestedName])
-            && !empty($config[$requestedName])
-            && isset($config[$requestedName]['roles'])
-            && is_array($config[$requestedName]['roles'])
         );
     }
 
@@ -55,11 +55,22 @@ class ArrayAdapterAbstractServiceFactory implements AbstractFactoryInterface
      */
     public function createServiceWithName(ServiceLocatorInterface $serviceLocator, $name, $requestedName)
     {
-         $config = $this->getConfig($serviceLocator)[$requestedName];
-         return new ArrayAdapter($config);
+        $config = $this->getConfig($serviceLocator);
+
+        $configStorage = null;
+        if (isset($config[$requestedName]['roles'])) {
+            $configStorage['roles'] = $config[$requestedName]['roles'];
+        }
+
+        if (isset($config[$requestedName]['type'])) {
+            return new $config[$requestedName]['type']($configStorage);
+        } else {
+            return new $this->serviceName($configStorage);
+        }
     }
 
     /**
+     * Get model configuration, if any
      *
      * @param  ServiceLocatorInterface $serviceLocator
      * @return array
@@ -71,7 +82,7 @@ class ArrayAdapterAbstractServiceFactory implements AbstractFactoryInterface
         }
 
         if (!$serviceLocator->has('Config')) {
-            $this->config = [];
+            $this->config = array();
             return $this->config;
         }
 
@@ -79,11 +90,12 @@ class ArrayAdapterAbstractServiceFactory implements AbstractFactoryInterface
         if (!isset($config[$this->configKey])
             || !is_array($config[$this->configKey])
         ) {
-            $this->config = [];
+            $this->config = array();
             return $this->config;
         }
 
         $this->config = $config[$this->configKey];
         return $this->config;
     }
-}
+
+} 

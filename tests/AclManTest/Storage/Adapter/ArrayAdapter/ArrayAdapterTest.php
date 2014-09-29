@@ -20,49 +20,49 @@ class ArrayAdapterTest extends AclManTestCase
      */
     protected $adapter;
 
+    protected $config = [
+      'roles' => [
+          'role1' => [
+              'resources' => [
+                  'resource1' => [
+                      [
+                          'assert' => 'test',
+                          'allow' =>  true,
+                          'privilege' => 'view'
+                      ],
+                      [
+                          'assert' => 'test',
+                          'allow' =>  true,
+                          'privilege' => 'add'
+                      ]
+                  ]
+              ]
+          ],
+          'role2' => [
+              'parents' => [
+                  'role1'
+              ],
+              'resources' => [
+                  'resource2' => [
+                      [
+                          'assert' => 'test',
+                          'allow' =>  true,
+                          'privilege' => 'view'
+                      ],
+                      [
+                          'assert' => 'test',
+                          'allow' =>  true,
+                          'privilege' => 'add'
+                      ]
+                  ]
+              ]
+          ],
+      ]
+    ];
+
     public function setUp()
     {
-        $role1 = new GenericRole('role1');
-        $role2 = 'role2';
-        $role3 = new GenericRole('role3');
-
-        $resource1 = new GenericResource('resource1');
-        $resource2 = 'resource2';
-        $resource3 = new GenericResource('resource3');
-
-        $options = [
-            'roles' => [
-                $role1,
-                $role2,
-                [
-                    'role' => $role3,
-                    'parents' => [
-                        $role2,
-                        $role1
-                    ],
-                ]
-            ],
-            'resources' => [
-                $resource1,
-                $resource2,
-                $resource3
-            ],
-            'permission' => [
-                new GenericPermission([
-                        'resource' => $resource2,
-                        'role'     => $role1,
-                        'allow'    => true
-                    ]
-                ),
-                [
-                    'resource' => 'resource3',
-                    'role'     => 'role1',
-                    'allow'    => false
-                ]
-            ]
-        ];
-
-        $this->adapter = new ArrayAdapter($options);
+        $this->adapter = new ArrayAdapter();
     }
 
     /**
@@ -73,40 +73,83 @@ class ArrayAdapterTest extends AclManTestCase
         $this->adapter->hasRole(10);
     }
 
-    public function testHasRole()
+    public function testHasRoles()
     {
-        $this->assertTrue($this->adapter->hasRole(new GenericRole('role1')));
-        $this->assertTrue($this->adapter->hasRole(new GenericRole('role2')));
-        $this->assertTrue($this->adapter->hasRole('role3'));
-        $this->assertFalse($this->adapter->hasRole(new GenericRole('role4')));
+        $this->assertFalse($this->adapter->hasRole('role1'));
     }
 
     /**
+     * @depends testHasRoles
+     */
+    public function testAddRole()
+    {
+        $this->assertSame($this->adapter, $this->adapter->addRole('role1'));
+        $this->assertTrue($this->adapter->hasRole('role1'));
+    }
+
+    /**
+     * @depends testAddRole
+     */
+    public function testAddRoleParents()
+    {
+        $this->adapter->addRole('role1');
+        $this->adapter->addRole('role2', ['role1']);
+        $this->assertTrue($this->adapter->hasRole('role1'));
+        $this->assertTrue($this->adapter->hasRole('role2'));
+    }
+
+    /**
+     * @depends testHasRoles
      * @expectedException \AclMan\Storage\Exception\RoleAlreadyExistException
      */
     public function testAddRoleException()
     {
-        $this->adapter->addRole(new GenericRole('role1'));
+        $this->adapter->addRole('role1');
+        $this->adapter->addRole('role1');
     }
 
     /**
      * @expectedException \AclMan\Role\Exception\InvalidParameterException
      */
-    public function testAddRolesException()
+    public function testAddRoleException2()
     {
-        $this->adapter->addRoles([10]);
+        $this->adapter->hasRole(11);
     }
 
+
+    /**
+     * @depends testAddRole
+     */
+    public function testAddRoles()
+    {
+        $this->adapter->addRoles(['role1']);
+        $this->assertTrue($this->adapter->hasRole('role1'));
+
+
+        $this->adapter->addRoles([['role' => 'role2', 'parents' => ['role1']]]);
+        $this->assertTrue($this->adapter->hasRole('role2'));
+    }
+
+    /**
+     * @depends testAddRole
+     */
     public function testGetRoles()
     {
-        $roles =  $this->adapter->getRoles();
-        $this->assertCount(3, $roles);
+        $this->assertCount(0,  $this->adapter->getRoles());
+        $this->adapter->addRoles(['role1']);
+        $this->assertCount(1,  $this->adapter->getRoles());
     }
 
+    /**
+     * @depends testAddRole
+     */
     public function testGetParentRoles()
     {
-        $roles =  $this->adapter->getParentRoles('role3');
-        $this->assertCount(2, $roles);
+        $this->adapter->addRoles(['role1']);
+        $this->assertCount(0,  $this->adapter->getParentRoles('role1'));
+
+        $this->adapter->addRoles([['role' => 'role2', 'parents' => ['role1']]]);
+        $this->assertCount(1,  $this->adapter->getParentRoles('role2'));
     }
 
     /**
@@ -114,121 +157,401 @@ class ArrayAdapterTest extends AclManTestCase
      */
     public function testGetParentRolesException()
     {
-        $roles =  $this->adapter->getParentRoles('role5');
+        $this->adapter->getParentRoles('role1');
     }
 
     /**
-     * @expectedException \AclMan\Storage\Exception\ResourceAlreadyExistException
+     * @depends testAddRole
      */
-    public function testAddResourceException()
+    public function testAddParentRoles()
     {
-        $this->adapter->addResource(new GenericResource('resource1'));
-    }
+        $this->adapter->addRoles(['role1']);
+        $this->adapter->addRoles(['role2']);
+        $this->adapter->addRoles(['role3']);
 
-    /**
-     * @expectedException \AclMan\Resource\Exception\InvalidParameterException
-     */
-    public function testAddResourcesException()
-    {
-        $this->adapter->addResources([10]);
-    }
 
-    public function testGetResources()
-    {
-        $resources = $this->adapter->getResources();
-        $this->assertCount(3, $resources);
-    }
-
-    public function testGetResource()
-    {
-        $resource = $this->adapter->getResource('resource1');
-        $this->assertInstanceOf('\Zend\Permissions\Acl\Resource\ResourceInterface', $resource);
-
-        $resource = $this->adapter->getResource('resource10');
-        $this->assertNull($resource);
-    }
-
-    public function testAddPermission()
-    {
-        $permission = new GenericPermission([
-                'role'     => 'role1',
-                'resource' => 'resource3',
-                'allow'    => 'true'
-            ]
-        );
-
-        $permission1 = new GenericPermission([
-                'role'     => 'role2',
-                'resource' => 'resource3',
-                'allow'    => 'true'
-            ]
-        );
-
-        $this->assertInstanceOf('\AclMan\Storage\StorageInterface', $this->adapter->addPermission($permission));
-        $this->assertInstanceOf('\AclMan\Storage\StorageInterface', $this->adapter->addPermission($permission1));
-    }
-
-    /**
-     * @expectedException \AclMan\Storage\Exception\InvalidParameterException
-     */
-    public function testAddPermissionsException()
-    {
-        $permission = new GenericPermission([
-                'role'     => 'role1',
-                'resource' => 'resource3',
-                'allow'    => 'true'
-            ]
-        );
-
-        $list = [$permission, 'test'];
-
-        $this->adapter->addPermissions($list);
-    }
-
-    /**
-     * @expectedException \AclMan\Storage\Exception\ResourceNotExistException
-     */
-    public function testAddPermissionResourceException()
-    {
-        $permission = new GenericPermission([
-                'role'     => 'role1',
-                'resource' => 'resource30',
-                'allow'    => 'true'
-            ]
-        );
-
-        $this->adapter->addPermission($permission);
+        $this->assertTrue($this->adapter->addParentRoles('role3', ['role1', 'role2']));
+        $this->assertCount(2,  $this->adapter->getParentRoles('role3'));
     }
 
     /**
      * @expectedException \AclMan\Storage\Exception\RoleNotExistException
      */
-    public function testAddPermissionRoleException()
+    public function testAddParentRolesException1()
     {
-        $permission = new GenericPermission([
-                'role'     => 'role10',
-                'resource' => 'resource3',
-                'allow'    => 'true'
-            ]
-        );
+        $this->adapter->addParentRoles('role3', ['role1', 'role2']);
+    }
+
+    /**
+     * @depends testAddRole
+     * @expectedException \AclMan\Storage\Exception\RoleNotExistException
+     */
+    public function testAddParentRolesException2()
+    {
+        $this->adapter->addRole('role1');
+        $this->adapter->addParentRoles('role1', ['role3', 'role2']);
+    }
+
+    public function testHasResource()
+    {
+        $this->assertFalse($this->adapter->hasResource('resource1'));
+    }
+
+    /**
+     * @depends testHasResource
+     */
+    public function testAddResource()
+    {
+        $this->assertSame($this->adapter, $this->adapter->addResource('resource1'));
+        $this->assertTrue($this->adapter->hasResource('resource1'));
+    }
+
+    /**
+     * @depends testAddResource
+     * @expectedException \AclMan\Storage\Exception\ResourceAlreadyExistException
+     */
+    public function testAddResourceException()
+    {
+        $this->adapter->addResource('resource1');
+        $this->adapter->addResource('resource1');
+    }
+
+    /**
+     * @depends testAddResource
+     * @expectedException \AclMan\Resource\Exception\InvalidParameterException
+     */
+    public function testAddResourceException2()
+    {
+        $this->adapter->addResource(1111);
+    }
+
+    /**
+     * @depends testAddResource
+     */
+    public function testAddResources()
+    {
+        $this->assertSame($this->adapter, $this->adapter->addResources(['resource1', 'resource2']));
+        $this->assertTrue($this->adapter->hasResource('resource1'));
+        $this->assertTrue($this->adapter->hasResource('resource2'));
+    }
+
+    /**
+     * @depends testAddResource
+     */
+    public function testGetResources()
+    {
+        $this->adapter->addResource('resource1');
+        $this->adapter->addResource('resource2');
+        $this->assertCount(2, $this->adapter->getResources());
+    }
+
+    /**
+     * @depends testAddRole
+     */
+    public function testAddPermission()
+    {
+        $this->adapter->addRoles(['role1']);
+        $this->adapter->addResource('resource1');
+
+        $permission =  $this->getMockBuilder('AclMan\Permission\GenericPermission')
+            ->disableOriginalConstructor()
+            ->setMethods(['getAssertion', 'isAllow', 'getPrivilege', 'getResourceId', 'getRoleId'])
+            ->getMock();
+
+        $permission->expects($this->any())
+            ->method('getRoleId')
+            ->will($this->returnValue('role1'));
+
+        $permission->expects($this->any())
+            ->method('getResourceId')
+            ->will($this->returnValue('resource1'));
+
+        $permission->expects($this->any())
+            ->method('getPrivilege')
+            ->will($this->returnValue('test'));
+
+        $permission->expects($this->any())
+            ->method('getAssertion')
+            ->will($this->returnValue(null));
+
+        $permission->expects($this->any())
+            ->method('isAllow')
+            ->will($this->returnValue(true));
+
+
+        $this->assertSame($this->adapter, $this->adapter->addPermission($permission));
+    }
+
+    /**
+     * @depends testAddRole
+     */
+    public function testAddPermissionNoRoleNoResource()
+    {
+        $this->adapter->addRoles(['role1']);
+        $this->adapter->addResource('resource1');
+
+        $permission =  $this->getMockBuilder('AclMan\Permission\GenericPermission')
+            ->disableOriginalConstructor()
+            ->setMethods(['getAssertion', 'isAllow', 'getPrivilege', 'getResourceId', 'getRoleId'])
+            ->getMock();
+
+        $permission->expects($this->any())
+            ->method('getRoleId')
+            ->will($this->returnValue(null));
+
+        $permission->expects($this->any())
+            ->method('getResourceId')
+            ->will($this->returnValue(null));
+
+        $permission->expects($this->any())
+            ->method('getPrivilege')
+            ->will($this->returnValue('test'));
+
+        $permission->expects($this->any())
+            ->method('getAssertion')
+            ->will($this->returnValue(null));
+
+        $permission->expects($this->any())
+            ->method('isAllow')
+            ->will($this->returnValue(true));
+
+        $this->assertSame($this->adapter, $this->adapter->addPermission($permission));
+    }
+
+    /**
+     * @depends testAddPermission
+     * @expectedException \AclMan\Storage\Exception\ResourceNotExistException
+     */
+    public function testAddPermissionException1()
+    {
+        $this->adapter->addRoles(['role1']);
+
+        $permission =  $this->getMockBuilder('AclMan\Permission\GenericPermission')
+            ->disableOriginalConstructor()
+            ->setMethods(['getAssertion', 'isAllow', 'getPrivilege', 'getResourceId', 'getRoleId'])
+            ->getMock();
+
+        $permission->expects($this->any())
+            ->method('getRoleId')
+            ->will($this->returnValue('role1'));
+
+        $permission->expects($this->any())
+            ->method('getResourceId')
+            ->will($this->returnValue('resource1'));
+
+        $permission->expects($this->any())
+            ->method('getPrivilege')
+            ->will($this->returnValue('test'));
+
+        $permission->expects($this->any())
+            ->method('getAssertion')
+            ->will($this->returnValue(null));
+
+        $permission->expects($this->any())
+            ->method('isAllow')
+            ->will($this->returnValue(true));
+
 
         $this->adapter->addPermission($permission);
     }
 
-    public function testGetPermission()
+    /**
+     * @depends testAddPermission
+     * @expectedException \AclMan\Storage\Exception\RoleNotExistException
+     */
+    public function testAddPermissionException2()
     {
-        $resource = new GenericResource('resource2');
+        $permission =  $this->getMockBuilder('AclMan\Permission\GenericPermission')
+            ->disableOriginalConstructor()
+            ->setMethods(['getAssertion', 'isAllow', 'getPrivilege', 'getResourceId', 'getRoleId'])
+            ->getMock();
 
-        $this->assertCount(1, $this->adapter->getPermissions($resource));
+        $permission->expects($this->any())
+            ->method('getRoleId')
+            ->will($this->returnValue('role1'));
+
+        $permission->expects($this->any())
+            ->method('getResourceId')
+            ->will($this->returnValue('resource1'));
+
+        $permission->expects($this->any())
+            ->method('getPrivilege')
+            ->will($this->returnValue('test'));
+
+        $permission->expects($this->any())
+            ->method('getAssertion')
+            ->will($this->returnValue(null));
+
+        $permission->expects($this->any())
+            ->method('isAllow')
+            ->will($this->returnValue(true));
+
+
+        $this->adapter->addPermission($permission);
     }
 
     /**
-     * @expectedException \AclMan\Storage\Exception\ResourceNotExistException
+     * @depends testAddPermission
+     * @expectedException \AclMan\Permission\Exception\InvalidParameterException
      */
-    public function testGetPermissionException()
+    public function testAddPermissionException3()
     {
-        $resource = new GenericResource('resource22');
+        $this->adapter->addPermission(1111);
+    }
 
-        $this->assertCount(1, $this->adapter->getPermissions($resource));
+    /**
+     * @depends testAddPermission
+     */
+    public function testAddPermissions()
+    {
+        $this->adapter->addRoles(['role1']);
+        $this->assertCount(0, $this->adapter->getPermissions('role1'));
+
+        $this->adapter->addResource('resource1');
+        $this->adapter->addResource('resource2');
+
+        $permissions = [];
+
+        $permission =  $this->getMockBuilder('AclMan\Permission\GenericPermission')
+            ->disableOriginalConstructor()
+            ->setMethods(['getAssertion', 'isAllow', 'getPrivilege', 'getResourceId', 'getRoleId'])
+            ->getMock();
+
+        $permission->expects($this->any())
+            ->method('getRoleId')
+            ->will($this->returnValue('role1'));
+
+        $permission->expects($this->any())
+            ->method('getResourceId')
+            ->will($this->returnValue('resource1'));
+
+        $permission->expects($this->any())
+            ->method('getPrivilege')
+            ->will($this->returnValue('test'));
+
+        $permission->expects($this->any())
+            ->method('getAssertion')
+            ->will($this->returnValue(null));
+
+        $permission->expects($this->any())
+            ->method('isAllow')
+            ->will($this->returnValue(true));
+
+        array_push($permissions, $permission);
+
+        $permission =  $this->getMockBuilder('AclMan\Permission\GenericPermission')
+            ->disableOriginalConstructor()
+            ->setMethods(['getAssertion', 'isAllow', 'getPrivilege', 'getResourceId', 'getRoleId'])
+            ->getMock();
+
+        $permission->expects($this->any())
+            ->method('getRoleId')
+            ->will($this->returnValue('role1'));
+
+        $permission->expects($this->any())
+            ->method('getResourceId')
+            ->will($this->returnValue('resource2'));
+
+        $permission->expects($this->any())
+            ->method('getPrivilege')
+            ->will($this->returnValue('test'));
+
+        $permission->expects($this->any())
+            ->method('getAssertion')
+            ->will($this->returnValue(null));
+
+        $permission->expects($this->any())
+            ->method('isAllow')
+            ->will($this->returnValue(true));
+
+        array_push($permissions, $permission);
+        $this->assertSame($this->adapter, $this->adapter->addPermissions($permissions));
+    }
+
+    /**
+     * @depends testAddPermission
+     */
+    public function testGetPermission()
+    {
+        $this->adapter->addRoles(['role1']);
+        $this->assertCount(0, $this->adapter->getPermissions('role1'));
+
+        $this->adapter->addResource('resource1');
+        $this->adapter->addResource('resource2');
+
+        $permission =  $this->getMockBuilder('AclMan\Permission\GenericPermission')
+            ->disableOriginalConstructor()
+            ->setMethods(['getAssertion', 'isAllow', 'getPrivilege', 'getResourceId', 'getRoleId'])
+            ->getMock();
+
+        $permission->expects($this->any())
+            ->method('getRoleId')
+            ->will($this->returnValue('role1'));
+
+        $permission->expects($this->any())
+            ->method('getResourceId')
+            ->will($this->returnValue('resource1'));
+
+        $permission->expects($this->any())
+            ->method('getPrivilege')
+            ->will($this->returnValue('test'));
+
+        $permission->expects($this->any())
+            ->method('getAssertion')
+            ->will($this->returnValue(null));
+
+        $permission->expects($this->any())
+            ->method('isAllow')
+            ->will($this->returnValue(true));
+
+        $this->adapter->addPermission($permission);
+        $this->assertCount(1, $this->adapter->getPermissions('role1', 'resource1'));
+
+        $this->assertCount(1, $this->adapter->getPermissions('role1', 'resource1'));
+
+        $permission =  $this->getMockBuilder('AclMan\Permission\GenericPermission')
+            ->disableOriginalConstructor()
+            ->setMethods(['getAssertion', 'isAllow', 'getPrivilege', 'getResourceId', 'getRoleId'])
+            ->getMock();
+
+        $permission->expects($this->any())
+            ->method('getRoleId')
+            ->will($this->returnValue('role1'));
+
+        $permission->expects($this->any())
+            ->method('getResourceId')
+            ->will($this->returnValue('resource2'));
+
+        $permission->expects($this->any())
+            ->method('getPrivilege')
+            ->will($this->returnValue('test'));
+
+        $permission->expects($this->any())
+            ->method('getAssertion')
+            ->will($this->returnValue(null));
+
+        $permission->expects($this->any())
+            ->method('isAllow')
+            ->will($this->returnValue(true));
+
+        $this->adapter->addPermission($permission);
+
+        $this->assertCount(2, $this->adapter->getPermissions('role1'));
+    }
+
+    public function testConstruct()
+    {
+        $adapter = new ArrayAdapter($this->config);
+
+        $this->assertTrue($adapter->hasRole('role1'));
+        $this->assertTrue($adapter->hasRole('role2'));
+
+        $this->assertCount(1, $adapter->getParentRoles('role2'));
+
+        $this->assertTrue($adapter->hasResource('resource1'));
+        $this->assertTrue($adapter->hasResource('resource2'));
+
+        $this->assertCount(2, $adapter->getPermissions('role1'));
+        $this->assertCount(2, $adapter->getPermissions('role2'));
     }
 }

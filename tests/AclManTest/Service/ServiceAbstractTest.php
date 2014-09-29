@@ -4,6 +4,7 @@ namespace AclManTest\Service;
 use AclMan\Permission\GenericPermission;
 use AclMan\Service\ServiceImplement;
 use AclManTest\AclManTestCase;
+use AclManTest\Assertion\TestAsset\Assertion\MockAssertion1;
 use AclManTest\Assertion\TestAsset\MockAssertionPluginManager;
 use Zend\Permissions\Acl\Acl;
 
@@ -55,6 +56,16 @@ class ServiceAbstractTest extends AclManTestCase
         $this->assertSame($this->service, $this->service->addRole('test2'));
     }
 
+    public function testHasRole()
+    {
+        $this->assertFalse($this->service->hasRole('role1'));
+    }
+
+    public function testAddRole()
+    {
+        $this->assertSame($this->service, $this->service->addRole('role1'));
+    }
+
     public function testServiceAbstractAllowNotFoundResource()
     {
         $this->service->setAllowNotFoundResource(true);
@@ -66,50 +77,6 @@ class ServiceAbstractTest extends AclManTestCase
 
     public function testLoadResourceNotFound()
     {
-        $this->service->addRole('role1');
-        $this->service->addRole('role2');
-
-        $mockStorage =  $this->getMockBuilder('AclMan\Storage\Adapter\ArrayAdapter\ArrayAdapter')
-            ->disableOriginalConstructor()
-            ->setMethods(['hasResource'])
-            ->getMock();
-
-        $mockStorage->expects($this->any())
-            ->method('hasResource')
-            ->will($this->returnValue(true));
-
-        $this->service->setStorage($mockStorage);
-
-        $this->service->setAllowNotFoundResource(false);
-        $this->service->loadResource('resource1');
-
-        $this->assertFalse($this->service->isAllowed('role1', 'resource1'));
-
-        $mockStorage =  $this->getMockBuilder('AclMan\Storage\Adapter\ArrayAdapter\ArrayAdapter')
-            ->disableOriginalConstructor()
-            ->setMethods(['hasResource'])
-            ->getMock();
-
-        $mockStorage->expects($this->any())
-            ->method('hasResource')
-            ->will($this->returnValue(true));
-
-        $this->service->setStorage($mockStorage);
-
-        $this->service->setAllowNotFoundResource(true);
-
-        $resultLoad = $this->service->loadResource('resource2');
-        $this->assertTrue($resultLoad);
-
-        $resultLoad = $this->service->loadResource('resource2');
-        $this->assertFalse($resultLoad);
-    }
-
-    public function testLoadResourceFound()
-    {
-        $this->service->addRole('role1');
-        $this->service->addRole('role2');
-
         $mockStorage =  $this->getMockBuilder('AclMan\Storage\Adapter\ArrayAdapter\ArrayAdapter')
             ->disableOriginalConstructor()
             ->setMethods(['hasResource', 'getPermissions'])
@@ -119,104 +86,239 @@ class ServiceAbstractTest extends AclManTestCase
             ->method('hasResource')
             ->will($this->returnValue(true));
 
-        $permissions = [
-            new GenericPermission([
-                    'role' => 'role2',
-                    'resource' => 'resource1',
-                    'privilege' => 'add',
-                    'allow' => true
-                ]
-            ),
-            new GenericPermission([
-                    'role' => 'role1',
-                    'resource' => 'resource1',
-                    'privilege' => 'view',
-                    'allow' => false
-                ]
-            )
-        ];
-
         $mockStorage->expects($this->any())
             ->method('getPermissions')
-            ->will($this->returnValue($permissions));
+            ->will($this->returnValue([]));
 
         $this->service->setStorage($mockStorage);
 
-        $resultLoad = $this->service->loadResource('resource1');
-        $this->assertTrue($resultLoad);
-
-        $resultLoad = $this->service->loadResource('resource1');
-        $this->assertFalse($resultLoad);
+        $this->assertFalse($this->service->loadResource('role1', 'resource1'));
     }
 
-    public function testIsAllowedNotResource()
+    /**
+     * @depends testAddRole
+     */
+    public function testLoadResourceAllow()
     {
-        $this->service->addRole('role100');
+        $this->service->addRole('role1');
 
         $mockStorage =  $this->getMockBuilder('AclMan\Storage\Adapter\ArrayAdapter\ArrayAdapter')
             ->disableOriginalConstructor()
-            ->setMethods(['hasResource'])
+            ->setMethods(['hasResource', 'getPermissions', 'hasRole'])
             ->getMock();
 
         $mockStorage->expects($this->any())
             ->method('hasResource')
+            ->will($this->returnValue(true));
+
+        $permission =  $this->getMockBuilder('AclMan\Permission\GenericPermission')
+            ->disableOriginalConstructor()
+            ->setMethods(['getAssertion', 'isAllow', 'getPrivilege', 'getResourceId', 'getRoleId'])
+            ->getMock();
+
+        $permission->expects($this->any())
+            ->method('getRoleId')
+            ->will($this->returnValue('role1'));
+
+        $permission->expects($this->any())
+            ->method('getResourceId')
+            ->will($this->returnValue('resource1'));
+
+        $permission->expects($this->any())
+            ->method('getPrivilege')
+            ->will($this->returnValue('view'));
+
+        $permission->expects($this->any())
+            ->method('getAssertion')
+            ->will($this->returnValue(null));
+
+        $permission->expects($this->any())
+            ->method('isAllow')
+            ->will($this->returnValue(true));
+
+        $mockStorage->expects($this->any())
+            ->method('getPermissions')
+            ->will($this->returnValue([
+                        $permission
+                    ]
+                )
+            );
+
+        $this->service->setStorage($mockStorage);
+
+        $this->assertTrue($this->service->loadResource('role1', 'resource1'));
+    }
+
+    /**
+     * @depends testAddRole
+     */
+    public function testLoadResourceDeny()
+    {
+        $this->service->addRole('role1');
+
+        $mockStorage =  $this->getMockBuilder('AclMan\Storage\Adapter\ArrayAdapter\ArrayAdapter')
+            ->disableOriginalConstructor()
+            ->setMethods(['hasResource', 'getPermissions', 'hasRole'])
+            ->getMock();
+
+        $mockStorage->expects($this->any())
+            ->method('hasResource')
+            ->will($this->returnValue(true));
+
+        $permission =  $this->getMockBuilder('AclMan\Permission\GenericPermission')
+            ->disableOriginalConstructor()
+            ->setMethods(['getAssertion', 'isAllow', 'getPrivilege', 'getResourceId', 'getRoleId'])
+            ->getMock();
+
+        $permission->expects($this->any())
+            ->method('getRoleId')
+            ->will($this->returnValue('role1'));
+
+        $permission->expects($this->any())
+            ->method('getResourceId')
+            ->will($this->returnValue('resource1'));
+
+        $permission->expects($this->any())
+            ->method('getPrivilege')
+            ->will($this->returnValue('view'));
+
+        $permission->expects($this->any())
+            ->method('getAssertion')
+            ->will($this->returnValue(null));
+
+        $permission->expects($this->any())
+            ->method('isAllow')
             ->will($this->returnValue(false));
 
+        $mockStorage->expects($this->any())
+            ->method('getPermissions')
+            ->will($this->returnValue([
+                        $permission
+                    ]
+                )
+            );
+
         $this->service->setStorage($mockStorage);
 
-        $this->assertFalse($this->service->isAllowed('role100', 'resource100'));
-
-        $this->service->setAllowNotFoundResource(true);
-
-        $this->assertTrue($this->service->isAllowed('role100', 'resource100'));
+        $this->assertTrue($this->service->loadResource('role1', 'resource1'));
     }
 
-    public function testLoadResourceFoundWithAssertion()
+    /**
+     * @depends testAddRole
+     */
+    public function testLoadResourceAssert()
     {
         $this->service->addRole('role1');
-        $this->service->addRole('role2');
+
+        $pluginManager = new MockAssertionPluginManager();
+        $pluginManager->setService('testAssert', new MockAssertion1());
 
         $mockStorage =  $this->getMockBuilder('AclMan\Storage\Adapter\ArrayAdapter\ArrayAdapter')
             ->disableOriginalConstructor()
-            ->setMethods(['hasResource', 'getPermissions'])
+            ->setMethods(['hasResource', 'getPermissions', 'hasRole'])
             ->getMock();
 
         $mockStorage->expects($this->any())
             ->method('hasResource')
             ->will($this->returnValue(true));
 
-        $permissions = [
-            new GenericPermission([
-                    'role' => 'role2',
-                    'resource' => 'resource1',
-                    'privilege' => 'add',
-                    'assert' => 'assert1',
-                    'allow' => true
-                ]
-            ),
-            new GenericPermission([
-                    'role' => 'role1',
-                    'resource' => 'resource1',
-                    'privilege' => 'view',
-                    'allow' => false
-                ]
-            )
-        ];
+        $permission =  $this->getMockBuilder('AclMan\Permission\GenericPermission')
+            ->disableOriginalConstructor()
+            ->setMethods(['getAssertion', 'isAllow', 'getPrivilege', 'getResourceId', 'getRoleId'])
+            ->getMock();
+
+        $permission->expects($this->any())
+            ->method('getRoleId')
+            ->will($this->returnValue('role1'));
+
+        $permission->expects($this->any())
+            ->method('getResourceId')
+            ->will($this->returnValue('resource1'));
+
+        $permission->expects($this->any())
+            ->method('getPrivilege')
+            ->will($this->returnValue('view'));
+
+        $permission->expects($this->any())
+            ->method('getAssertion')
+            ->will($this->returnValue('testAssert'));
+
+        $permission->expects($this->any())
+            ->method('isAllow')
+            ->will($this->returnValue(false));
 
         $mockStorage->expects($this->any())
             ->method('getPermissions')
-            ->will($this->returnValue($permissions));
+            ->will($this->returnValue([
+                        $permission
+                    ]
+                )
+            );
+
+        $this->service->setStorage($mockStorage);
+        $this->service->setPluginManager($pluginManager);
+
+        $this->assertTrue($this->service->loadResource('role1', 'resource1'));
+    }
+
+    public function testHasResource()
+    {
+        $this->assertFalse($this->service->hasResource('resource1'));
+    }
+
+    /**
+     * @depends testAddRole
+     */
+    public function testIsAllowed()
+    {
+        $this->service->addRole('role1');
+        $this->service->addRole('role2');
+
+        $mockStorage =  $this->getMockBuilder('AclMan\Storage\Adapter\ArrayAdapter\ArrayAdapter')
+            ->disableOriginalConstructor()
+            ->setMethods(['hasResource', 'getPermissions', 'hasRole'])
+            ->getMock();
+
+        $mockStorage->expects($this->any())
+            ->method('hasResource')
+            ->will($this->returnValue(true));
+
+        $permission =  $this->getMockBuilder('AclMan\Permission\GenericPermission')
+            ->disableOriginalConstructor()
+            ->setMethods(['getAssertion', 'isAllow', 'getPrivilege', 'getResourceId', 'getRoleId'])
+            ->getMock();
+
+        $permission->expects($this->any())
+            ->method('getRoleId')
+            ->will($this->returnValue('role1'));
+
+        $permission->expects($this->any())
+            ->method('getResourceId')
+            ->will($this->returnValue('resource1'));
+
+        $permission->expects($this->any())
+            ->method('getPrivilege')
+            ->will($this->returnValue('view'));
+
+        $permission->expects($this->any())
+            ->method('getAssertion')
+            ->will($this->returnValue(null));
+
+        $permission->expects($this->any())
+            ->method('isAllow')
+            ->will($this->returnValue(true));
+
+        $mockStorage->expects($this->any())
+            ->method('getPermissions')
+            ->will($this->returnValue([
+                        $permission
+                    ]
+                )
+            );
 
         $this->service->setStorage($mockStorage);
 
-        $pluginManager = new MockAssertionPluginManager();
-        $this->service->setPluginManager($pluginManager);
-
-
-        $resultLoad = $this->service->loadResource('resource1');
-        $this->assertTrue($resultLoad);
-
-        $resultLoad = $this->service->loadResource('resource1');
-        $this->assertFalse($resultLoad);
+        $this->assertFalse($this->service->isAllowed('role2', 'resource1', 'view'));
+        $this->assertTrue($this->service->isAllowed('role1', 'resource1', 'view'));
     }
 } 

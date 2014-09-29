@@ -26,9 +26,7 @@ class ArrayAdapterAbstractServiceFactoryTest extends AclManTestCase
             'aclManArrayAdapterStorage' => [
                 'ArrayStorage' => [
                     'roles' => [
-                        new GenericRole('role1'),
-                        new GenericRole('role2'),
-                        new GenericRole('role3')
+
                     ]
                 ],
                 'ArrayStorage1' => []
@@ -50,6 +48,7 @@ class ArrayAdapterAbstractServiceFactoryTest extends AclManTestCase
     public function testHasService()
     {
         $serviceLocator = $this->serviceManager;
+
         $this->assertTrue($serviceLocator->has('ArrayStorage'));
         $this->assertFalse($serviceLocator->has('ArrayStorage1'));
     }

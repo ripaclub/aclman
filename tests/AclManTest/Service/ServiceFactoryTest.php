@@ -1,10 +1,4 @@
 <?php
-/**
- * Created by visa
- * Date:  8/26/14 1:07 PM
- * Class: ServiceFactoryTest.php
- */
-
 namespace AclManTest\Service;
 
 use AclManTest\AclManTestCase;

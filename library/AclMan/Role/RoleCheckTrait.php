@@ -1,7 +1,6 @@
 <?php
 namespace AclMan\Role;
 
-use AclMan\Role\Exception\InvalidParameterException;
 use Zend\Permissions\Acl\Role\GenericRole;
 use Zend\Permissions\Acl\Role\RoleInterface;
 
@@ -10,7 +9,7 @@ trait RoleCheckTrait
     /**
      * @param $role
      * @return GenericRole
-     * @throws InvalidParameterException
+     * @throws Exception\InvalidParameterException
      */
     private function checkRole($role)
     {
@@ -19,7 +18,7 @@ trait RoleCheckTrait
         }
 
         if(!($role instanceof RoleInterface)){
-            throw new InvalidParameterException('Invalid type role');
+            throw new Exception\InvalidParameterException(sprintf('Invalid type role %s', (is_object($role)) ? get_class($role) : gettype($role)));
         }
 
         return $role;

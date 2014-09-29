@@ -8,9 +8,28 @@ use Zend\Permissions\Acl\Role\RoleInterface;
 interface StorageInterface
 {
     /**
-     * @return array
+     * CONST
+     ******************************************************************************************************************/
+
+    const NODE_ROLES        = 'roles';
+    const NODE_RESOURCES    = 'resources';
+    const NODE_PERMISSION   = 'permission';
+    const NODE_PARENTS_ROLE = 'parents';
+
+    const ALL_ROLES      = 'all-roles';
+    const ALL_RESOURCES  = 'all-resources';
+    const ALL_PRIVILEGES = 'all-privileges';
+
+    /**
+     * CONST
+     ******************************************************************************************************************/
+
+    /**
+     * @param $role
+     * @param array $parents
+     * @return bool
      */
-    public function getRoles();
+    public function addParentRoles($role, array $parents);
 
     /**
      * @param $role
@@ -18,6 +37,10 @@ interface StorageInterface
      */
     public function getParentRoles($role);
 
+    /**
+     * @return array
+     */
+    public function getRoles();
     /**
      * @param RoleInterface $role
      * @param array $parents
@@ -37,12 +60,6 @@ interface StorageInterface
     public function getResources();
 
     /**
-     * @param string $resourceId
-     * @return null|ResourceInterface
-     */
-    public function getResource($resourceId);
-
-    /**
      * @param ResourceInterface $resource
      * @return bool
      */
@@ -55,10 +72,11 @@ interface StorageInterface
     public function hasResource($resource);
 
     /**
-     * @param ResourceInterface $resource
+     * @param null $role
+     * @param null $resource
      * @return array
      */
-    public function getPermissions($resource);
+    public function getPermissions($role = null, $resource = null);
 
     /**
      * @param PermissionInterface $permission

@@ -4,6 +4,8 @@ namespace AclMan\Service;
 use AclMan\Acl\AclAwareTrait;
 use AclMan\Assertion\AssertionAwareTrait;
 use AclMan\Resource\ResourceCheckTrait;
+use AclMan\Role\RoleAwareTrait;
+use AclMan\Role\RoleCheckTrait;
 use AclMan\Storage\StorageAwareTrait;
 use Zend\Permissions\Acl\Resource;
 use Zend\Permissions\Acl\Resource\ResourceInterface;
@@ -18,6 +20,7 @@ class ServiceAbstract implements ServiceInterface
     use StorageAwareTrait;
     use AclAwareTrait;
     use ResourceCheckTrait;
+    use RoleCheckTrait;
     use AssertionAwareTrait;
 
     /**
@@ -89,29 +92,30 @@ class ServiceAbstract implements ServiceInterface
     }
 
     /**
-     * Load resource
+     * Load permission
      *
-     * @param ResourceInterface $resource
+     * @param null $role
+     * @param null $resource
      * @return bool
      */
-    public function loadResource($resource)
+    public function loadResource($role = null, $resource = null)
     {
-        $resource = $this->checkResource($resource);
-
-        if($this->getStorage()->hasResource($resource) && !$this->getAcl()->hasResource($resource)) {
+        if($resource && $this->getStorage()->hasResource($resource) && !$this->getAcl()->hasResource($resource)) {
             $this->getAcl()->addResource($resource);
-            //$roles = $this->getRoles();
+        }
 
-            $permissions = $this->getStorage()->getPermissions($resource);
-            /* @var $permission \AclMan\Permission\GenericPermission */
+        $permissions = $this->getStorage()->getPermissions($role, $resource);
+        if ($this->getStorage()->hasResource($resource) && count($permissions) > 0) {
+        /* @var $permission \AclMan\Permission\GenericPermission */
             foreach($permissions as $permission) {
                 $assert = null;
+
                 if ($permission->getAssertion()) {
                     $assert = $this->getPluginManager()->get($permission->getAssertion());
                 }
 
                 if($permission->isAllow()) {
-                    //var_dump(sprintf('ALLOW: role %s resource %s privilege %s', ucfirst($permission->getRoleId()), ucfirst($permission->getResourceId()), $permission->getPrivilege()));
+                   // var_dump(sprintf('ALLOW: role "%s" resource "%s" privilege "%s"', $permission->getRoleId(), $permission->getResourceId(), $permission->getPrivilege()));
                     $this->getAcl()->allow(
                         $permission->getRoleId(),
                         $permission->getResourceId(),
@@ -119,7 +123,7 @@ class ServiceAbstract implements ServiceInterface
                         $assert
                     );
                 } else {
-                    //var_dump(sprintf('DENY: role %s resource %s privilege %s', ucfirst($permission->getRoleId()), ucfirst($permission->getResourceId()), $permission->getPrivilege()));
+                 //   var_dump(sprintf('DENY: role "%s" resource "%s" privilege "%s"', $permission->getRoleId(), $permission->getResourceId(), $permission->getPrivilege()));
                     $this->getAcl()->deny(
                         $permission->getRoleId(),
                         $permission->getResourceId(),
@@ -174,16 +178,8 @@ class ServiceAbstract implements ServiceInterface
      */
     public function isAllowed($role = null, $resource = null, $privilege = null)
     {
-        $this->loadResource($resource);
-        if ($this->hasResource($resource)) {
-            return $this->getAcl()->isAllowed($role, $resource, $privilege);
-        }
-        else {
-            if ($this->allowNotFoundResource) {
-                return true;
-            }
-            return false;
-        }
+        $this->loadResource($role, $resource);
+        return $this->getAcl()->isAllowed($role, $resource, $privilege);
     }
 
     /**
@@ -192,6 +188,11 @@ class ServiceAbstract implements ServiceInterface
     public function setAllowNotFoundResource($allowNotFoundResource)
     {
         $this->allowNotFoundResource = (boolean) $allowNotFoundResource;
+        if ($this->allowNotFoundResource) {
+            $this->getAcl()->allow();
+        } else {
+            $this->getAcl()->deny();
+        }
     }
 
     /**
