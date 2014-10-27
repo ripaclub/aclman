@@ -6,8 +6,10 @@
  * @copyright   Copyright (c) 2014, RipaClub
  * @license     http://opensource.org/licenses/BSD-2-Clause Simplified BSD License
  */
-chdir(__DIR__);
+namespace AclManTest\Assertion\TestAsset\Assertion;
 
-if (!file_exists('../vendor/autoload.php')) {
-    throw new \RuntimeException('vendor/autoload.php not found. Run a composer install.');
+
+class MockWrongAssertion
+{
+
 }

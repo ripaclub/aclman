@@ -1,0 +1,19 @@
+<?php
+/**
+ * ACL Manager
+ *
+ * @link        https://github.com/ripaclub/aclman
+ * @copyright   Copyright (c) 2014, RipaClub
+ * @license     http://opensource.org/licenses/BSD-2-Clause Simplified BSD License
+ */
+namespace Exception;
+
+use AlcMan\Exception\ExceptionInterface;
+use Zend\ServiceManager\Exception\ServiceNotCreatedException as ZendServiceNotCreatedException;
+
+/**
+ * Class ServiceNotCreatedException
+ */
+class ServiceNotCreatedException extends ZendServiceNotCreatedException implements ExceptionInterface
+{
+}
