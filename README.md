@@ -51,9 +51,9 @@ Configuration
 
 AclMan library has only two configuration nodes:
 
-1. `aclman_storage`: to configure the persistence layer in which to save your ACL rules
+1. `aclman_storage` to configure the persistence layer in which to save your ACL rules
 
-2. `aclman_services`: to configure your services (e.g., a storage and optionally a plugin manager)
+2. `aclman_services` to configure your services (e.g., a storage and optionally a plugin manager)
 
 Usage (1)
 ---------
@@ -189,6 +189,7 @@ Finally we can use our new assertions (see `(*)` in the comments) to configure r
 ]
 ```
 
+Notice the behaviour ...
 
 ```php
 $aclService1 = $serviceLocator->get('AclService\Ex1');
