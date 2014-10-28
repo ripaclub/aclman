@@ -51,26 +51,22 @@ class GenericPermission implements PermissionInterface
      */
     public function __construct($options = null)
     {
-        switch(true) {
-            case isset($options['role']):
-                $role = $this->checkRole($options['role']);
-                $this->roleId = $role->getRoleId();
-                break;
-            case isset($options['resource']):
-                $resource = $this->checkResource($options['resource']);
-                $this->resourceId = $resource->getResourceId();
-                break;
-            case isset($options['privilege']):
-                $this->setPrivilege($options['privilege']);
-                break;
-            case isset($options['allow']):
-                $this->allow = (bool) $options['allow'];
-                break;
-            case isset($options['assert']):
-                $this->setAssertion($options['assert']);
-                break;
-            default:
-                break;
+        if (isset($options['role'])) {
+            $role = $this->checkRole($options['role']);
+            $this->roleId = $role->getRoleId();
+        }
+        if (isset($options['resource'])) {
+            $resource = $this->checkResource($options['resource']);
+            $this->resourceId = $resource->getResourceId();
+        }
+        if (isset($options['privilege'])) {
+            $this->setPrivilege($options['privilege']);
+        }
+        if (isset($options['allow'])) {
+            $this->allow = (bool) $options['allow'];
+        }
+        if (isset($options['assert'])) {
+            $this->setAssertion($options['assert']);
         }
     }
 

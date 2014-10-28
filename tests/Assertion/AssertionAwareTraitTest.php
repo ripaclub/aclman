@@ -10,6 +10,9 @@ namespace AclManTest\Assertion;
 
 use AclManTest\AclManTestCase;
 
+/**
+ * Class AssertionAwareTraitTest
+ */
 class AssertionAwareTraitTest extends AclManTestCase
 {
     /**

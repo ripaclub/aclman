@@ -13,97 +13,89 @@ use AclMan\Storage\StorageInterface;
 use Zend\Permissions\Acl\Resource\ResourceInterface;
 use Zend\Permissions\Acl\Role\RoleInterface;
 
+/**
+ * Class MockAdapter
+ */
 class MockAdapter implements StorageInterface
 {
     /**
-     * @param $role
-     * @param array $parents
-     * @return bool
+     * {@inheritdoc}
      */
     public function addParentRoles($role, array $parents)
     {
-        // TODO: Implement addParentRoles() method.
+        // TODO: implement addParentRoles() method.
     }
 
     /**
-     * @param $role
-     * @return array
+     * {@inheritdoc}
      */
     public function getParentRoles($role)
     {
-        // TODO: Implement getParentRoles() method.
+        // TODO: implement getParentRoles() method.
     }
 
     /**
-     * @return array
+     * {@inheritdoc}
      */
     public function getRoles()
     {
-        // TODO: Implement getRoles() method.
+        // TODO: implement getRoles() method.
     }
 
     /**
-     * @param RoleInterface $role
-     * @param array $parents
-     * @return bool
+     * {@inheritdoc}
      */
     public function addRole($role, array $parents = [])
     {
-        // TODO: Implement addRole() method.
+        // TODO: implement addRole() method.
     }
 
     /**
-     * @param RoleInterface $role
-     * @return bool
+     * {@inheritdoc}
      */
     public function hasRole($role)
     {
-        // TODO: Implement hasRole() method.
+        // TODO: implement hasRole() method.
     }
 
     /**
-     * @return array
+     * {@inheritdoc}
      */
     public function getResources()
     {
-        // TODO: Implement getResources() method.
+        // TODO: implement getResources() method.
     }
 
     /**
-     * @param ResourceInterface $resource
-     * @return bool
+     * {@inheritdoc}
      */
     public function addResource($resource)
     {
-        // TODO: Implement addResource() method.
+        // TODO: implement addResource() method.
     }
 
     /**
-     * @param ResourceInterface $resource
-     * @return bool
+     * {@inheritdoc}
      */
     public function hasResource($resource)
     {
-        // TODO: Implement hasResource() method.
+        // TODO: implement hasResource() method.
     }
 
     /**
-     * @param null $role
-     * @param null $resource
-     * @return array
+     * {@inheritdoc}
      */
     public function getPermissions($role = null, $resource = null)
     {
-        // TODO: Implement getPermissions() method.
+        // TODO: implement getPermissions() method.
     }
 
     /**
-     * @param PermissionInterface $permission
-     * @return bool
+     * {@inheritdoc}
      */
     public function addPermission($permission)
     {
-        // TODO: Implement addPermission() method.
+        // TODO: implement addPermission() method.
     }
 
 }

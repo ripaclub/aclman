@@ -12,6 +12,9 @@ use AclManTest\AclManTestCase;
 use Zend\Mvc\Service\ServiceManagerConfig;
 use Zend\ServiceManager;
 
+/**
+ * Class StorageFactoryTest
+ */
 class StorageFactoryTest extends AclManTestCase
 {
     /**
@@ -53,14 +56,12 @@ class StorageFactoryTest extends AclManTestCase
         ];
 
         $this->serviceManager = new ServiceManager\ServiceManager(
-            new ServiceManagerConfig(array(
-                    'abstract_factories' => array(
-                        'AclMan\Storage\StorageFactory',
-                    ),
-                )
-            )
+            new ServiceManagerConfig([
+                'abstract_factories' => [
+                    'AclMan\Storage\StorageFactory',
+                ],
+            ])
         );
-
         $this->serviceManager->setService('Config', $config);
     }
 
@@ -81,26 +82,24 @@ class StorageFactoryTest extends AclManTestCase
     public function testHasServiceWithoutConfig()
     {
         $this->serviceManager = new ServiceManager\ServiceManager(
-            new ServiceManagerConfig(array(
-                    'abstract_factories' => array(
-                        'AclMan\Storage\StorageFactory',
-                    ),
-                )
-            )
+            new ServiceManagerConfig([
+                'abstract_factories' => [
+                    'AclMan\Storage\StorageFactory',
+                ],
+            ])
         );
 
         $this->assertFalse($this->serviceManager->has('AclStorage'));
 
         $this->serviceManager = new ServiceManager\ServiceManager(
-            new ServiceManagerConfig(array(
-                    'abstract_factories' => array(
-                        'AclMan\Storage\StorageFactory',
-                    ),
-                )
-            )
+            new ServiceManagerConfig([
+                'abstract_factories' => [
+                    'AclMan\Storage\StorageFactory',
+                ],
+            ])
         );
 
-        $this->serviceManager->setService('Config', array());
+        $this->serviceManager->setService('Config', []);
 
         $this->assertFalse($this->serviceManager->has('AclStorage'));
     }

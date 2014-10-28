@@ -8,8 +8,6 @@
  */
 namespace AclMan\Exception;
 
-use AlcMan\Exception\ExceptionInterface;
-
 /**
  * Class InvalidParameterException
  */

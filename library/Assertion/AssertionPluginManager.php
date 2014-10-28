@@ -8,7 +8,7 @@
  */
 namespace AclMan\Assertion;
 
-use AlcMan\Exception\InvalidAssertException;
+use AclMan\Exception\InvalidAssertException;
 use Zend\Permissions\Acl\Assertion\AssertionInterface;
 use Zend\ServiceManager\AbstractPluginManager;
 
@@ -33,7 +33,7 @@ class AssertionPluginManager extends AbstractPluginManager
         }
 
         throw new InvalidAssertException(sprintf(
-            'Plugin of type %s is invalid; must implement Zend\Permissions\Acl\Assertion\AssertionInterface',
+            'Plugin of type "%s" is invalid; must implement Zend\Permissions\Acl\Assertion\AssertionInterface',
             (is_object($plugin) ? get_class($plugin) : gettype($plugin))
         ));
     }

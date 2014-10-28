@@ -8,10 +8,14 @@
  */
 namespace AclManTest\Service;
 
+use AclMan\Service\ServiceFactory;
 use AclManTest\AclManTestCase;
 use Zend\Mvc\Service\ServiceManagerConfig;
 use Zend\ServiceManager;
 
+/**
+ * Class ServiceFactoryTest
+ */
 class ServiceFactoryTest extends AclManTestCase
 {
     /**
@@ -21,7 +25,6 @@ class ServiceFactoryTest extends AclManTestCase
 
     public function setUp()
     {
-
         $config = [
             'alcManServices' => [
                 'AclService' => [
@@ -32,23 +35,53 @@ class ServiceFactoryTest extends AclManTestCase
                 'AclService1' => [],
             ],
         ];
-
         $this->serviceManager = new ServiceManager\ServiceManager(
-            new ServiceManagerConfig(array(
-                    'abstract_factories' => array(
+            new ServiceManagerConfig(
+                [
+                    'abstract_factories' => [
                         'AclMan\Service\ServiceFactory',
-                    ),
-                )
+                    ],
+                ]
             )
         );
 
         $this->serviceManager->setService('Config', $config);
-
         $adapter = $this->getMockBuilder('AclMan\Storage\StorageInterface')->getMock();
         $this->serviceManager->setService('ArrayStorage1', $adapter);
-
         $pluginManager = $this->getMockBuilder('AclMan\Assertion\AssertionPluginManager')->getMock();
         $this->serviceManager->setService('PluginManager', $pluginManager);
+    }
+
+    public function testCreateServiceShouldThrowServiceNotCreatedExceptionWhenStorageIsInvalid()
+    {
+        $sm = new ServiceManager\ServiceManager(
+            new ServiceManagerConfig(
+                [
+                    'abstract_factories' => [
+                        'AclMan\Service\ServiceFactory',
+                    ],
+                ]
+            )
+        );
+        $sm->setService(
+            'Config',
+            [
+                'alcManServices' => [
+                    'AclService' => [
+                        'storage' => 'InvalidStorage',
+                        'pluginManager' => 'PluginManager',
+                        'allowNotFoundResource' => true
+                    ],
+                    'AclService1' => [],
+                ]
+            ]
+        );
+        $sm->setService('PluginManager', $this->getMockBuilder('AclMan\Assertion\AssertionPluginManager')->getMock());
+        $sm->setService('InvalidStorage', $this->getMockBuilder('\ArrayObject')->getMock());
+        $sf = new ServiceFactory();
+        $this->assertTrue($sf->canCreateServiceWithName($sm, null, 'AclService'));
+        $this->setExpectedException('\AclMan\Exception\ServiceNotCreatedException');
+        $sf->createServiceWithName($sm, null, 'AclService');
     }
 
     public function testHasService()
@@ -61,26 +94,28 @@ class ServiceFactoryTest extends AclManTestCase
     public function testHasServiceWithoutConfig()
     {
         $this->serviceManager = new ServiceManager\ServiceManager(
-            new ServiceManagerConfig(array(
-                    'abstract_factories' => array(
+            new ServiceManagerConfig(
+                [
+                    'abstract_factories' => [
                         'AclMan\Service\ServiceFactory',
-                    ),
-                )
+                    ],
+                ]
             )
         );
 
         $this->assertFalse($this->serviceManager->has('AclService'));
 
         $this->serviceManager = new ServiceManager\ServiceManager(
-            new ServiceManagerConfig(array(
-                    'abstract_factories' => array(
+            new ServiceManagerConfig(
+                [
+                    'abstract_factories' => [
                         'AclMan\Service\ServiceFactory',
-                    ),
-                )
+                    ],
+                ]
             )
         );
 
-        $this->serviceManager->setService('Config', array());
+        $this->serviceManager->setService('Config', []);
 
         $this->assertFalse($this->serviceManager->has('AclService'));
     }

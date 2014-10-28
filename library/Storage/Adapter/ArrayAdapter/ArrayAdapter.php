@@ -17,7 +17,7 @@ use AclMan\Permission\PermissionCheckTrait;
 use AclMan\Permission\PermissionInterface;
 use AclMan\Resource\ResourceCheckTrait;
 use AclMan\Role\RoleCheckTrait;
-use AclMan\Storage\Exception\ResourceAlreadyExistException;
+use AclMan\Exception\ResourceAlreadyExistException;
 use AclMan\Storage\StorageInterface;
 use Zend\Permissions\Acl\Resource\GenericResource;
 use Zend\Permissions\Acl\Resource\ResourceInterface;
@@ -267,23 +267,27 @@ class ArrayAdapter implements StorageInterface
 
         if ($resource) {
             $resource = $this->checkResource($resource);
-            $listPermission = $this->permission[$role->getRoleId()][self::NODE_RESOURCES][$resource->getResourceId()];
-            if (isset($listPermission[self::NODE_PERMISSION])) {
-                $listPermission = $listPermission[self::NODE_PERMISSION];
+            if(isset($this->permission[$role->getRoleId()][self::NODE_RESOURCES][$resource->getResourceId()][self::NODE_PERMISSION])) {
+                $listPermission = $this->permission[$role->getRoleId()][self::NODE_RESOURCES][$resource->getResourceId()][self::NODE_PERMISSION];
                 foreach ($listPermission as $permission) {
+
                     $permission['role'] = $role->getRoleId();
                     $permission['resource'] = $resource->getResourceId();
+
                     $obj = new GenericPermission($permission);
                     array_push($result, $obj);
                 }
+
             }
         } else {
-            if (isset($this->permission[$role->getRoleId()][self::NODE_RESOURCES])) {
+            if(isset($this->permission[$role->getRoleId()][self::NODE_RESOURCES])) {
                 $listResource = $this->permission[$role->getRoleId()][self::NODE_RESOURCES];
                 foreach ($listResource as $keyResource => $listPermission) {
                     foreach ($listPermission[self::NODE_PERMISSION] as $permission) {
+
                         $permission['role'] = $role->getRoleId();
                         $permission['resource'] = ($keyResource != self::ALL_RESOURCES) ? $keyResource : null;
+
                         $obj = new GenericPermission($permission);
                         array_push($result, $obj);
                     }

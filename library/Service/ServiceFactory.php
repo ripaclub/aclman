@@ -9,7 +9,7 @@
 namespace AclMan\Service;
 
 use AclMan\Storage\StorageInterface;
-use Exception\ServiceNotCreatedException;
+use AclMan\Exception\ServiceNotCreatedException;
 use Zend\Permissions\Acl\Acl;
 use Zend\ServiceManager\AbstractFactoryInterface;
 use Zend\ServiceManager\ServiceLocatorInterface;
@@ -86,7 +86,7 @@ class ServiceFactory implements AbstractFactoryInterface
         $storage = $serviceLocator->get($config['storage']);
         if (!$storage instanceof StorageInterface) {
             throw new ServiceNotCreatedException(sprintf(
-                '"%s" expectes a AclMan\Storage\StorageInterface; received "%s"',
+                '"%s" expectes a AclMan\Storage\StorageInterface is set in the config; received "%s"',
                 __METHOD__,
                 is_object($storage) ? get_class($storage) : gettype($storage)
             ));

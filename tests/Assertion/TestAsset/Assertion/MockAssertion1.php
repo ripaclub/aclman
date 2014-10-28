@@ -15,34 +15,16 @@ use Zend\Permissions\Acl\Role\RoleInterface;
 use Zend\ServiceManager\ServiceLocatorAwareInterface;
 use Zend\ServiceManager\ServiceLocatorAwareTrait;
 
+/**
+ * Class MockAssertion1
+ */
 class MockAssertion1 implements AssertionInterface, ServiceLocatorAwareInterface
 {
-    /**
-     * TRAIT
-     ******************************************************************************************************************/
-
     use ServiceLocatorAwareTrait;
 
-    /**
-     * METHOD
-     ******************************************************************************************************************/
-
-    /**
-     * Returns true if and only if the assertion conditions are met
-     *
-     * This method is passed the ACL, Role, Resource, and privilege to which the authorization query applies. If the
-     * $role, $resource, or $privilege parameters are null, it means that the query applies to all Roles, Resources, or
-     * privileges, respectively.
-     *
-     * @param  Acl $acl
-     * @param  RoleInterface $role
-     * @param  ResourceInterface $resource
-     * @param  string $privilege
-     * @return bool
-     */
     public function assert(Acl $acl, RoleInterface $role = null, ResourceInterface $resource = null, $privilege = null)
     {
-        // TODO: Implement assert() method.
+        // TODO: implement assert() method.
     }
 
 }

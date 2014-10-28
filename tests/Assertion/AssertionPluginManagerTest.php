@@ -11,6 +11,9 @@ namespace AclManTest\Assertion;
 use AclMan\Assertion\AssertionPluginManager;
 use AclManTest\AclManTestCase;
 
+/**
+ * Class AssertionPluginManagerTest
+ */
 class AssertionPluginManagerTest extends AclManTestCase
 {
     protected $manager;
@@ -24,11 +27,14 @@ class AssertionPluginManagerTest extends AclManTestCase
 
     public function testAssertionPluginManager()
     {
-        $this->assertInstanceOf('AclManTest\Assertion\TestAsset\Assertion\MockAssertion1', $this->manager->get('assert1'));
+        $this->assertInstanceOf(
+            'AclManTest\Assertion\TestAsset\Assertion\MockAssertion1',
+            $this->manager->get('assert1')
+        );
     }
 
     /**
-     * @expectedException \AclMan\Assertion\Exception\InvalidAssertException
+     * @expectedException \AclMan\Exception\InvalidAssertException
      */
     public function testAssertionPluginManagerException()
     {

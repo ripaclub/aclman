@@ -8,12 +8,12 @@
  */
 namespace AclManTest\Storage\Adapter\ArrayAdapter;
 
-use AclMan\Permission\GenericPermission;
 use AclMan\Storage\Adapter\ArrayAdapter\ArrayAdapter;
 use AclManTest\AclManTestCase;
-use Zend\Permissions\Acl\Resource\GenericResource;
-use Zend\Permissions\Acl\Role\GenericRole;
 
+/**
+ * Class ArrayAdapterTest
+ */
 class ArrayAdapterTest extends AclManTestCase
 {
     /**
@@ -22,43 +22,43 @@ class ArrayAdapterTest extends AclManTestCase
     protected $adapter;
 
     protected $config = [
-      'roles' => [
-          'role1' => [
-              'resources' => [
-                  'resource1' => [
-                      [
-                          'assert' => 'test',
-                          'allow' =>  true,
-                          'privilege' => 'view'
-                      ],
-                      [
-                          'assert' => 'test',
-                          'allow' =>  true,
-                          'privilege' => 'add'
-                      ]
-                  ]
-              ]
-          ],
-          'role2' => [
-              'parents' => [
-                  'role1'
-              ],
-              'resources' => [
-                  'resource2' => [
-                      [
-                          'assert' => 'test',
-                          'allow' =>  true,
-                          'privilege' => 'view'
-                      ],
-                      [
-                          'assert' => 'test',
-                          'allow' =>  true,
-                          'privilege' => 'add'
-                      ]
-                  ]
-              ]
-          ],
-      ]
+        'roles' => [
+            'role1' => [
+                'resources' => [
+                    'resource1' => [
+                        [
+                            'assert' => 'test',
+                            'allow' => true,
+                            'privilege' => 'view'
+                        ],
+                        [
+                            'assert' => 'test',
+                            'allow' => true,
+                            'privilege' => 'add'
+                        ]
+                    ]
+                ]
+            ],
+            'role2' => [
+                'parents' => [
+                    'role1'
+                ],
+                'resources' => [
+                    'resource2' => [
+                        [
+                            'assert' => 'test',
+                            'allow' => true,
+                            'privilege' => 'view'
+                        ],
+                        [
+                            'assert' => 'test',
+                            'allow' => true,
+                            'privilege' => 'add'
+                        ]
+                    ]
+                ]
+            ],
+        ]
     ];
 
     public function setUp()
@@ -67,7 +67,7 @@ class ArrayAdapterTest extends AclManTestCase
     }
 
     /**
-     * @expectedException \AclMan\Role\Exception\InvalidParameterException
+     * @expectedException \AclMan\Exception\InvalidParameterException
      */
     public function testHasRolesException()
     {
@@ -101,7 +101,7 @@ class ArrayAdapterTest extends AclManTestCase
 
     /**
      * @depends testHasRoles
-     * @expectedException \AclMan\Storage\Exception\RoleAlreadyExistException
+     * @expectedException \AclMan\Exception\RoleAlreadyExistException
      */
     public function testAddRoleException()
     {
@@ -110,7 +110,7 @@ class ArrayAdapterTest extends AclManTestCase
     }
 
     /**
-     * @expectedException \AclMan\Role\Exception\InvalidParameterException
+     * @expectedException \AclMan\Exception\InvalidParameterException
      */
     public function testAddRoleException2()
     {
@@ -136,9 +136,9 @@ class ArrayAdapterTest extends AclManTestCase
      */
     public function testGetRoles()
     {
-        $this->assertCount(0,  $this->adapter->getRoles());
+        $this->assertCount(0, $this->adapter->getRoles());
         $this->adapter->addRoles(['role1']);
-        $this->assertCount(1,  $this->adapter->getRoles());
+        $this->assertCount(1, $this->adapter->getRoles());
     }
 
     /**
@@ -147,14 +147,14 @@ class ArrayAdapterTest extends AclManTestCase
     public function testGetParentRoles()
     {
         $this->adapter->addRoles(['role1']);
-        $this->assertCount(0,  $this->adapter->getParentRoles('role1'));
+        $this->assertCount(0, $this->adapter->getParentRoles('role1'));
 
         $this->adapter->addRoles([['role' => 'role2', 'parents' => ['role1']]]);
-        $this->assertCount(1,  $this->adapter->getParentRoles('role2'));
+        $this->assertCount(1, $this->adapter->getParentRoles('role2'));
     }
 
     /**
-     * @expectedException \AclMan\Storage\Exception\RoleNotExistException
+     * @expectedException \AclMan\Exception\RoleNotExistException
      */
     public function testGetParentRolesException()
     {
@@ -172,11 +172,11 @@ class ArrayAdapterTest extends AclManTestCase
 
 
         $this->assertTrue($this->adapter->addParentRoles('role3', ['role1', 'role2']));
-        $this->assertCount(2,  $this->adapter->getParentRoles('role3'));
+        $this->assertCount(2, $this->adapter->getParentRoles('role3'));
     }
 
     /**
-     * @expectedException \AclMan\Storage\Exception\RoleNotExistException
+     * @expectedException \AclMan\Exception\RoleNotExistException
      */
     public function testAddParentRolesException1()
     {
@@ -185,7 +185,7 @@ class ArrayAdapterTest extends AclManTestCase
 
     /**
      * @depends testAddRole
-     * @expectedException \AclMan\Storage\Exception\RoleNotExistException
+     * @expectedException \AclMan\Exception\RoleNotExistException
      */
     public function testAddParentRolesException2()
     {
@@ -209,7 +209,7 @@ class ArrayAdapterTest extends AclManTestCase
 
     /**
      * @depends testAddResource
-     * @expectedException \AclMan\Storage\Exception\ResourceAlreadyExistException
+     * @expectedException \AclMan\Exception\ResourceAlreadyExistException
      */
     public function testAddResourceException()
     {
@@ -219,7 +219,7 @@ class ArrayAdapterTest extends AclManTestCase
 
     /**
      * @depends testAddResource
-     * @expectedException \AclMan\Resource\Exception\InvalidParameterException
+     * @expectedException \AclMan\Exception\InvalidParameterException
      */
     public function testAddResourceException2()
     {
@@ -254,7 +254,7 @@ class ArrayAdapterTest extends AclManTestCase
         $this->adapter->addRoles(['role1']);
         $this->adapter->addResource('resource1');
 
-        $permission =  $this->getMockBuilder('AclMan\Permission\GenericPermission')
+        $permission = $this->getMockBuilder('AclMan\Permission\GenericPermission')
             ->disableOriginalConstructor()
             ->setMethods(['getAssertion', 'isAllow', 'getPrivilege', 'getResourceId', 'getRoleId'])
             ->getMock();
@@ -291,7 +291,7 @@ class ArrayAdapterTest extends AclManTestCase
         $this->adapter->addRoles(['role1']);
         $this->adapter->addResource('resource1');
 
-        $permission =  $this->getMockBuilder('AclMan\Permission\GenericPermission')
+        $permission = $this->getMockBuilder('AclMan\Permission\GenericPermission')
             ->disableOriginalConstructor()
             ->setMethods(['getAssertion', 'isAllow', 'getPrivilege', 'getResourceId', 'getRoleId'])
             ->getMock();
@@ -321,13 +321,13 @@ class ArrayAdapterTest extends AclManTestCase
 
     /**
      * @depends testAddPermission
-     * @expectedException \AclMan\Storage\Exception\ResourceNotExistException
+     * @expectedException \AclMan\Exception\ResourceNotExistException
      */
     public function testAddPermissionException1()
     {
         $this->adapter->addRoles(['role1']);
 
-        $permission =  $this->getMockBuilder('AclMan\Permission\GenericPermission')
+        $permission = $this->getMockBuilder('AclMan\Permission\GenericPermission')
             ->disableOriginalConstructor()
             ->setMethods(['getAssertion', 'isAllow', 'getPrivilege', 'getResourceId', 'getRoleId'])
             ->getMock();
@@ -358,11 +358,11 @@ class ArrayAdapterTest extends AclManTestCase
 
     /**
      * @depends testAddPermission
-     * @expectedException \AclMan\Storage\Exception\RoleNotExistException
+     * @expectedException \AclMan\Exception\RoleNotExistException
      */
     public function testAddPermissionException2()
     {
-        $permission =  $this->getMockBuilder('AclMan\Permission\GenericPermission')
+        $permission = $this->getMockBuilder('AclMan\Permission\GenericPermission')
             ->disableOriginalConstructor()
             ->setMethods(['getAssertion', 'isAllow', 'getPrivilege', 'getResourceId', 'getRoleId'])
             ->getMock();
@@ -393,7 +393,7 @@ class ArrayAdapterTest extends AclManTestCase
 
     /**
      * @depends testAddPermission
-     * @expectedException \AclMan\Permission\Exception\InvalidParameterException
+     * @expectedException \AclMan\Exception\InvalidParameterException
      */
     public function testAddPermissionException3()
     {
@@ -413,7 +413,7 @@ class ArrayAdapterTest extends AclManTestCase
 
         $permissions = [];
 
-        $permission =  $this->getMockBuilder('AclMan\Permission\GenericPermission')
+        $permission = $this->getMockBuilder('AclMan\Permission\GenericPermission')
             ->disableOriginalConstructor()
             ->setMethods(['getAssertion', 'isAllow', 'getPrivilege', 'getResourceId', 'getRoleId'])
             ->getMock();
@@ -440,7 +440,7 @@ class ArrayAdapterTest extends AclManTestCase
 
         array_push($permissions, $permission);
 
-        $permission =  $this->getMockBuilder('AclMan\Permission\GenericPermission')
+        $permission = $this->getMockBuilder('AclMan\Permission\GenericPermission')
             ->disableOriginalConstructor()
             ->setMethods(['getAssertion', 'isAllow', 'getPrivilege', 'getResourceId', 'getRoleId'])
             ->getMock();
@@ -480,7 +480,7 @@ class ArrayAdapterTest extends AclManTestCase
         $this->adapter->addResource('resource1');
         $this->adapter->addResource('resource2');
 
-        $permission =  $this->getMockBuilder('AclMan\Permission\GenericPermission')
+        $permission = $this->getMockBuilder('AclMan\Permission\GenericPermission')
             ->disableOriginalConstructor()
             ->setMethods(['getAssertion', 'isAllow', 'getPrivilege', 'getResourceId', 'getRoleId'])
             ->getMock();
@@ -510,7 +510,7 @@ class ArrayAdapterTest extends AclManTestCase
 
         $this->assertCount(1, $this->adapter->getPermissions('role1', 'resource1'));
 
-        $permission =  $this->getMockBuilder('AclMan\Permission\GenericPermission')
+        $permission = $this->getMockBuilder('AclMan\Permission\GenericPermission')
             ->disableOriginalConstructor()
             ->setMethods(['getAssertion', 'isAllow', 'getPrivilege', 'getResourceId', 'getRoleId'])
             ->getMock();

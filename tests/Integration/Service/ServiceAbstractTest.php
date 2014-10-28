@@ -18,7 +18,11 @@ use Zend\Permissions\Acl\Acl;
 use Zend\Mvc\Service\ServiceManagerConfig;
 use Zend\ServiceManager;
 
-
+/**
+ * Class ServiceAbstractTest
+ *
+ * @grop integration
+ */
 class ServiceAbstractTest extends AclManTestCase
 {
     /**
@@ -37,14 +41,14 @@ class ServiceAbstractTest extends AclManTestCase
                                 'resource1' => [
                                     [
                                         'assert' => null,
-                                        'allow' =>  true,
+                                        'allow' => true,
                                         'privilege' => 'view'
                                     ]
                                 ],
                                 'resource2' => [
                                     [
                                         'assert' => 'assertFalse',
-                                        'allow' =>  true,
+                                        'allow' => true,
                                         'privilege' => 'view'
                                     ]
                                 ]
@@ -58,19 +62,19 @@ class ServiceAbstractTest extends AclManTestCase
                                 'resource1' => [
                                     [
                                         'assert' => null,
-                                        'allow' =>  true,
+                                        'allow' => true,
                                         'privilege' => 'add'
                                     ]
                                 ],
                                 'resource2' => [
                                     [
                                         'assert' => null,
-                                        'allow' =>  true,
+                                        'allow' => true,
                                         'privilege' => 'add'
                                     ],
                                     [
                                         'assert' => 'assertTrue',
-                                        'allow' =>  true,
+                                        'allow' => true,
                                         'privilege' => 'view'
                                     ]
 
@@ -89,7 +93,8 @@ class ServiceAbstractTest extends AclManTestCase
         ];
 
         $this->serviceManager = new ServiceManager\ServiceManager(
-            new ServiceManagerConfig([
+            new ServiceManagerConfig(
+                [
                     'abstract_factories' => [
                         'AclMan\Service\ServiceFactory',
                         'AclMan\Storage\StorageFactory'
@@ -109,10 +114,9 @@ class ServiceAbstractTest extends AclManTestCase
     }
 
 
-
     public function testHasService()
     {
-       $this->assertTrue($this->serviceManager->has('AclService'));
+        $this->assertTrue($this->serviceManager->has('AclService'));
     }
 
     /**
@@ -145,10 +149,22 @@ class ServiceAbstractTest extends AclManTestCase
         $service = $this->serviceManager->get('AclService');
         $service->init();
 
-        $this->assertSame($acl->isAllowed('role1', 'resource1', 'view'), $service->isAllowed('role1', 'resource1', 'view'));
-        $this->assertSame($acl->isAllowed('role1', 'resource1', 'add'), $service->isAllowed('role1', 'resource1', 'add'));
+        $this->assertSame(
+            $acl->isAllowed('role1', 'resource1', 'view'),
+            $service->isAllowed('role1', 'resource1', 'view')
+        );
+        $this->assertSame(
+            $acl->isAllowed('role1', 'resource1', 'add'),
+            $service->isAllowed('role1', 'resource1', 'add')
+        );
 
-        $this->assertSame($acl->isAllowed('role2', 'resource1', 'view'), $service->isAllowed('role2', 'resource1', 'view'));
-        $this->assertSame($acl->isAllowed('role2', 'resource1', 'add'), $service->isAllowed('role2', 'resource1', 'add'));
+        $this->assertSame(
+            $acl->isAllowed('role2', 'resource1', 'view'),
+            $service->isAllowed('role2', 'resource1', 'view')
+        );
+        $this->assertSame(
+            $acl->isAllowed('role2', 'resource1', 'add'),
+            $service->isAllowed('role2', 'resource1', 'add')
+        );
     }
 }

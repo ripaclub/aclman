@@ -10,6 +10,9 @@ namespace AclManTest\Storage;
 
 use AclManTest\AclManTestCase;
 
+/**
+ * Class StorageAwareTraitTest
+ */
 class StorageAwareTraitTest extends AclManTestCase
 {
     protected $traitObject;
@@ -25,6 +28,6 @@ class StorageAwareTraitTest extends AclManTestCase
             $this->getMockBuilder('AclMan\Storage\StorageInterface')
                 ->getMock()
         );
-        $this->assertInstanceOf('AclMan\Storage\StorageInterface',  $this->traitObject->getStorage());
+        $this->assertInstanceOf('AclMan\Storage\StorageInterface', $this->traitObject->getStorage());
     }
 }

@@ -15,6 +15,9 @@ use AclManTest\Assertion\TestAsset\Assertion\MockAssertion1;
 use AclManTest\Assertion\TestAsset\MockAssertionPluginManager;
 use Zend\Permissions\Acl\Acl;
 
+/**
+ * Class ServiceAbstractTest
+ */
 class ServiceAbstractTest extends AclManTestCase
 {
     /**
@@ -31,9 +34,9 @@ class ServiceAbstractTest extends AclManTestCase
 
     public function testServiceAbstractInit()
     {
-        $mockStorage =  $this->getMockBuilder('AclMan\Storage\Adapter\ArrayAdapter\ArrayAdapter')
-                ->disableOriginalConstructor()
-                ->getMock();
+        $mockStorage = $this->getMockBuilder('AclMan\Storage\Adapter\ArrayAdapter\ArrayAdapter')
+            ->disableOriginalConstructor()
+            ->getMock();
 
         $mockStorage->expects($this->any())
             ->method('getRoles')
@@ -44,7 +47,7 @@ class ServiceAbstractTest extends AclManTestCase
 
         $this->assertEmpty($this->service->getRoles());
 
-        $mockStorage =  $this->getMockBuilder('AclMan\Storage\Adapter\ArrayAdapter\ArrayAdapter')
+        $mockStorage = $this->getMockBuilder('AclMan\Storage\Adapter\ArrayAdapter\ArrayAdapter')
             ->disableOriginalConstructor()
             ->getMock();
 
@@ -84,7 +87,7 @@ class ServiceAbstractTest extends AclManTestCase
 
     public function testLoadResourceNotFound()
     {
-        $mockStorage =  $this->getMockBuilder('AclMan\Storage\Adapter\ArrayAdapter\ArrayAdapter')
+        $mockStorage = $this->getMockBuilder('AclMan\Storage\Adapter\ArrayAdapter\ArrayAdapter')
             ->disableOriginalConstructor()
             ->setMethods(['hasResource', 'getPermissions'])
             ->getMock();
@@ -109,7 +112,7 @@ class ServiceAbstractTest extends AclManTestCase
     {
         $this->service->addRole('role1');
 
-        $mockStorage =  $this->getMockBuilder('AclMan\Storage\Adapter\ArrayAdapter\ArrayAdapter')
+        $mockStorage = $this->getMockBuilder('AclMan\Storage\Adapter\ArrayAdapter\ArrayAdapter')
             ->disableOriginalConstructor()
             ->setMethods(['hasResource', 'getPermissions', 'hasRole'])
             ->getMock();
@@ -118,7 +121,7 @@ class ServiceAbstractTest extends AclManTestCase
             ->method('hasResource')
             ->will($this->returnValue(true));
 
-        $permission =  $this->getMockBuilder('AclMan\Permission\GenericPermission')
+        $permission = $this->getMockBuilder('AclMan\Permission\GenericPermission')
             ->disableOriginalConstructor()
             ->setMethods(['getAssertion', 'isAllow', 'getPrivilege', 'getResourceId', 'getRoleId'])
             ->getMock();
@@ -145,11 +148,7 @@ class ServiceAbstractTest extends AclManTestCase
 
         $mockStorage->expects($this->any())
             ->method('getPermissions')
-            ->will($this->returnValue([
-                        $permission
-                    ]
-                )
-            );
+            ->will($this->returnValue([$permission]));
 
         $this->service->setStorage($mockStorage);
 
@@ -163,7 +162,7 @@ class ServiceAbstractTest extends AclManTestCase
     {
         $this->service->addRole('role1');
 
-        $mockStorage =  $this->getMockBuilder('AclMan\Storage\Adapter\ArrayAdapter\ArrayAdapter')
+        $mockStorage = $this->getMockBuilder('AclMan\Storage\Adapter\ArrayAdapter\ArrayAdapter')
             ->disableOriginalConstructor()
             ->setMethods(['hasResource', 'getPermissions', 'hasRole'])
             ->getMock();
@@ -172,7 +171,7 @@ class ServiceAbstractTest extends AclManTestCase
             ->method('hasResource')
             ->will($this->returnValue(true));
 
-        $permission =  $this->getMockBuilder('AclMan\Permission\GenericPermission')
+        $permission = $this->getMockBuilder('AclMan\Permission\GenericPermission')
             ->disableOriginalConstructor()
             ->setMethods(['getAssertion', 'isAllow', 'getPrivilege', 'getResourceId', 'getRoleId'])
             ->getMock();
@@ -199,11 +198,7 @@ class ServiceAbstractTest extends AclManTestCase
 
         $mockStorage->expects($this->any())
             ->method('getPermissions')
-            ->will($this->returnValue([
-                        $permission
-                    ]
-                )
-            );
+            ->will($this->returnValue([$permission]));
 
         $this->service->setStorage($mockStorage);
 
@@ -220,7 +215,7 @@ class ServiceAbstractTest extends AclManTestCase
         $pluginManager = new MockAssertionPluginManager();
         $pluginManager->setService('testAssert', new MockAssertion1());
 
-        $mockStorage =  $this->getMockBuilder('AclMan\Storage\Adapter\ArrayAdapter\ArrayAdapter')
+        $mockStorage = $this->getMockBuilder('AclMan\Storage\Adapter\ArrayAdapter\ArrayAdapter')
             ->disableOriginalConstructor()
             ->setMethods(['hasResource', 'getPermissions', 'hasRole'])
             ->getMock();
@@ -229,7 +224,7 @@ class ServiceAbstractTest extends AclManTestCase
             ->method('hasResource')
             ->will($this->returnValue(true));
 
-        $permission =  $this->getMockBuilder('AclMan\Permission\GenericPermission')
+        $permission = $this->getMockBuilder('AclMan\Permission\GenericPermission')
             ->disableOriginalConstructor()
             ->setMethods(['getAssertion', 'isAllow', 'getPrivilege', 'getResourceId', 'getRoleId'])
             ->getMock();
@@ -256,7 +251,9 @@ class ServiceAbstractTest extends AclManTestCase
 
         $mockStorage->expects($this->any())
             ->method('getPermissions')
-            ->will($this->returnValue([
+            ->will(
+                $this->returnValue(
+                    [
                         $permission
                     ]
                 )
@@ -281,7 +278,7 @@ class ServiceAbstractTest extends AclManTestCase
         $this->service->addRole('role1');
         $this->service->addRole('role2');
 
-        $mockStorage =  $this->getMockBuilder('AclMan\Storage\Adapter\ArrayAdapter\ArrayAdapter')
+        $mockStorage = $this->getMockBuilder('AclMan\Storage\Adapter\ArrayAdapter\ArrayAdapter')
             ->disableOriginalConstructor()
             ->setMethods(['hasResource', 'getPermissions', 'hasRole'])
             ->getMock();
@@ -290,7 +287,7 @@ class ServiceAbstractTest extends AclManTestCase
             ->method('hasResource')
             ->will($this->returnValue(true));
 
-        $permission =  $this->getMockBuilder('AclMan\Permission\GenericPermission')
+        $permission = $this->getMockBuilder('AclMan\Permission\GenericPermission')
             ->disableOriginalConstructor()
             ->setMethods(['getAssertion', 'isAllow', 'getPrivilege', 'getResourceId', 'getRoleId'])
             ->getMock();
@@ -317,7 +314,9 @@ class ServiceAbstractTest extends AclManTestCase
 
         $mockStorage->expects($this->any())
             ->method('getPermissions')
-            ->will($this->returnValue([
+            ->will(
+                $this->returnValue(
+                    [
                         $permission
                     ]
                 )

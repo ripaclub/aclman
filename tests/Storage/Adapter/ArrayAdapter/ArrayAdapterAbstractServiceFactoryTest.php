@@ -13,6 +13,9 @@ use Zend\Permissions\Acl\Role\GenericRole;
 use Zend\Mvc\Service\ServiceManagerConfig;
 use Zend\ServiceManager;
 
+/**
+ * Class ArrayAdapterAbstractServiceFactoryTest
+ */
 class ArrayAdapterAbstractServiceFactoryTest extends AclManTestCase
 {
     /**
@@ -35,12 +38,11 @@ class ArrayAdapterAbstractServiceFactoryTest extends AclManTestCase
         ];
 
         $this->serviceManager = new ServiceManager\ServiceManager(
-            new ServiceManagerConfig(array(
-                    'abstract_factories' => array(
-                        'AclMan\Storage\Adapter\ArrayAdapter\ArrayAdapterAbstractServiceFactory',
-                    ),
-                )
-            )
+            new ServiceManagerConfig([
+                'abstract_factories' => [
+                    'AclMan\Storage\Adapter\ArrayAdapter\ArrayAdapterAbstractServiceFactory',
+                ],
+            ])
         );
 
         $this->serviceManager->setService('Config', $config);
@@ -57,27 +59,22 @@ class ArrayAdapterAbstractServiceFactoryTest extends AclManTestCase
     public function testHasServiceWithoutConfig()
     {
         $this->serviceManager = new ServiceManager\ServiceManager(
-            new ServiceManagerConfig(array(
-                    'abstract_factories' => array(
-                        'AclMan\Storage\Adapter\ArrayAdapter\ArrayAdapterAbstractServiceFactory',
-                    ),
-                )
-            )
+            new ServiceManagerConfig([
+                'abstract_factories' => [
+                    'AclMan\Storage\Adapter\ArrayAdapter\ArrayAdapterAbstractServiceFactory',
+                ],
+            ])
         );
-
         $this->assertFalse($this->serviceManager->has('ArrayStorage1'));
 
         $this->serviceManager = new ServiceManager\ServiceManager(
-            new ServiceManagerConfig(array(
-                    'abstract_factories' => array(
-                        'AclMan\Storage\Adapter\ArrayAdapter\ArrayAdapterAbstractServiceFactory',
-                    ),
-                )
-            )
+            new ServiceManagerConfig([
+                'abstract_factories' => [
+                    'AclMan\Storage\Adapter\ArrayAdapter\ArrayAdapterAbstractServiceFactory',
+                ],
+            ])
         );
-
-        $this->serviceManager->setService('Config', array());
-
+        $this->serviceManager->setService('Config', []);
         $this->assertFalse($this->serviceManager->has('ArrayStorage1'));
     }
 

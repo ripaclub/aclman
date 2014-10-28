@@ -8,8 +8,9 @@
  */
 namespace AclManTest\Assertion\TestAsset\Assertion;
 
-
+/**
+ * Class MockWrongAssertion
+ */
 class MockWrongAssertion
 {
-
 }

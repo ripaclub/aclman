@@ -10,6 +10,9 @@ namespace AclManTest\Role;
 
 use AclManTest\AclManTestCase;
 
+/**
+ * Class RoleAwareTraitTest
+ */
 class RoleAwareTraitTest extends AclManTestCase
 {
     /**

@@ -13,6 +13,9 @@ use AclManTest\AclManTestCase;
 use Zend\Permissions\Acl\Resource\GenericResource;
 use Zend\Permissions\Acl\Role\GenericRole;
 
+/**
+ * Class GenericPermissionTest
+ */
 class GenericPermissionTest extends AclManTestCase
 {
     protected $permission;
@@ -24,9 +27,9 @@ class GenericPermissionTest extends AclManTestCase
 
         $options = [
             'resource' => $resource2,
-            'role'     => $role1,
-            'allow'    => true,
-            'assert'   => 'test'
+            'role' => $role1,
+            'allow' => true,
+            'assert' => 'test'
         ];
 
         $this->permission = new GenericPermission($options);
@@ -37,10 +40,10 @@ class GenericPermissionTest extends AclManTestCase
         $this->assertSame('test', $this->permission->getAssertion());
 
         $options = [
-            'resource'  => 'resource2',
-            'role'      => 'role1',
-            'allow'     => false,
-            'assert'    => 'test',
+            'resource' => 'resource2',
+            'role' => 'role1',
+            'allow' => false,
+            'assert' => 'test',
             'privilege' => 'add'
         ];
 
@@ -67,11 +70,12 @@ class GenericPermissionTest extends AclManTestCase
         $this->assertSame('role1', $this->permission->getRoleId());
         $this->assertSame('resource2', $this->permission->getResourceId());
     }
+
     public function testSetterPrivilege()
     {
         $this->permission = new GenericPermission();
 
-        $this->permission ->setPrivilege('edit');
-        $this->assertSame('edit',  $this->permission ->getPrivilege());
+        $this->permission->setPrivilege('edit');
+        $this->assertSame('edit', $this->permission->getPrivilege());
     }
 }
