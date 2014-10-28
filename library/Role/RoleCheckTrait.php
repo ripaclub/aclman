@@ -18,7 +18,7 @@ use Zend\Permissions\Acl\Role\RoleInterface;
 trait RoleCheckTrait
 {
     /**
-     * @param $role
+     * @param string|RoleInterface $role
      * @return GenericRole
      * @throws InvalidParameterException
      */

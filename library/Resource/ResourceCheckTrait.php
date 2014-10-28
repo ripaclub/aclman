@@ -18,7 +18,7 @@ use Zend\Permissions\Acl\Resource\ResourceInterface;
 trait ResourceCheckTrait
 {
     /**
-     * @param $resource
+     * @param string|ResourceInterface $resource
      * @return GenericResource
      * @throws InvalidParameterException
      */
