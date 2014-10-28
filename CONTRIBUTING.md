@@ -1,6 +1,6 @@
 # Contributing
 
-Contributions to **aclman** library are always welcomed and encouraged.
+Contributions to AclMan library are always welcomed and encouraged.
 
 You make our lives easier by sending us your contributions through github pull requests.
 
@@ -20,7 +20,7 @@ The core team members are:
 
 ## Got a question or problem?
 
-If you have questions about how to use **aclman** library please write at <ripaclub@gmail.com>.
+If you have questions about how to use AclMan library please write at <ripaclub@gmail.com>.
 
 Other communication channels will be activated soon. In the mean time you can also contact us writing a [new issue](https://github.com/ripaclub/aclman/issues/new).
 

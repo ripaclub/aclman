@@ -84,7 +84,7 @@ class ServiceAbstractTest extends AclManTestCase
                     ]
                 ]
             ],
-            'alcManServices' => [
+            'aclman_services' => [
                 'AclService' => [
                     'storage' => 'AclStorage',
                     'pluginManager' => 'assertManager',

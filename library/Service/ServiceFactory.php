@@ -23,7 +23,7 @@ class ServiceFactory implements AbstractFactoryInterface
      * Config Key
      * @var string
      */
-    protected $configKey = 'alcManServices';
+    protected $configKey = 'aclman_services'; // FIXME: changed from aclManServices into
 
     /**
      * Default service class name

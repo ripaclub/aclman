@@ -15,6 +15,15 @@ Installation
 
 **WIP**
 
+Configuration
+-------------
+
+**AclMan** library has only two configuration nodes:
+
+1. `aclman_storage`: aimed at configuring ...
+
+2. `aclman_services`: ...
+
 Usage
 -----
 

@@ -26,7 +26,7 @@ class ServiceFactoryTest extends AclManTestCase
     public function setUp()
     {
         $config = [
-            'alcManServices' => [
+            'aclman_services' => [
                 'AclService' => [
                     'storage' => 'ArrayStorage1',
                     'pluginManager' => 'PluginManager',
@@ -66,7 +66,7 @@ class ServiceFactoryTest extends AclManTestCase
         $sm->setService(
             'Config',
             [
-                'alcManServices' => [
+                'aclman_services' => [
                     'AclService' => [
                         'storage' => 'InvalidStorage',
                         'pluginManager' => 'PluginManager',
