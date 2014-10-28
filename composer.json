@@ -1,6 +1,6 @@
 {
     "name": "ripaclub/aclman",
-    "description": "ALC manager",
+    "description": "A library designed to manage ACL",
     "homepage": "http://github.com/ripaclub/aclman",
     "license": "BSD-2-Clause",
     "require": {
@@ -39,6 +39,10 @@
     "keywords": [
         "acl",
         "acl manager",
-        "access control list"
+        "access control list",
+        "roles",
+        "resources",
+        "privileges",
+        "storage"
     ]
 }
