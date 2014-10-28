@@ -29,8 +29,8 @@ class ServiceFactoryTest extends AclManTestCase
             'aclman_services' => [
                 'AclService' => [
                     'storage' => 'ArrayStorage1',
-                    'pluginManager' => 'PluginManager',
-                    'allowNotFoundResource' => true
+                    'plugin_manager' => 'PluginManager',
+                    'allow_not_found_resource' => true
                 ],
                 'AclService1' => [],
             ],
@@ -69,8 +69,8 @@ class ServiceFactoryTest extends AclManTestCase
                 'aclman_services' => [
                     'AclService' => [
                         'storage' => 'InvalidStorage',
-                        'pluginManager' => 'PluginManager',
-                        'allowNotFoundResource' => true
+                        'plugin_manager' => 'PluginManager',
+                        'allow_not_found_resource' => true
                     ],
                     'AclService1' => [],
                 ]

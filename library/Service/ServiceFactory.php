@@ -23,7 +23,7 @@ class ServiceFactory implements AbstractFactoryInterface
      * Config Key
      * @var string
      */
-    protected $configKey = 'aclman_services'; // FIXME: changed from aclManServices into
+    protected $configKey = 'aclman_services';
 
     /**
      * Default service class name
@@ -61,9 +61,9 @@ class ServiceFactory implements AbstractFactoryInterface
             is_string($config[$requestedName]['storage']) &&
             $serviceLocator->has($config[$requestedName]['storage']) &&
             // Check Storage
-            isset($config[$requestedName]['pluginManager']) &&
-            is_string($config[$requestedName]['pluginManager']) &&
-            $serviceLocator->has($config[$requestedName]['pluginManager'])
+            isset($config[$requestedName]['plugin_manager']) &&
+            is_string($config[$requestedName]['plugin_manager']) &&
+            $serviceLocator->has($config[$requestedName]['plugin_manager'])
         );
     }
 
@@ -92,7 +92,7 @@ class ServiceFactory implements AbstractFactoryInterface
             ));
         }
         // PluginManager
-        $pluginManager = $serviceLocator->get($config['pluginManager']);
+        $pluginManager = $serviceLocator->get($config['plugin_manager']);
 
         // Config Service
         $acl = new Acl();
@@ -101,8 +101,8 @@ class ServiceFactory implements AbstractFactoryInterface
         $service->setAcl($acl);
         $service->setPluginManager($pluginManager);
 
-        if (isset($config['allowNotFoundResource'])) {
-            $service->setAllowNotFoundResource($config['allowNotFoundResource']);
+        if (isset($config['allow_not_found_resource'])) {
+            $service->setAllowNotFoundResource($config['allow_not_found_resource']);
         }
 
         return $service;
