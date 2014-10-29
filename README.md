@@ -1,5 +1,5 @@
-ACL manager
-===========
+ACL manager [![Latest Stable Version](https://poser.pugx.org/ripaclub/aclman/v/stable.png)](https://packagist.org/packages/ripaclub/aclman)
+============
 
 AclMan is a PHP library designed to manage access control list (ACL).
 
