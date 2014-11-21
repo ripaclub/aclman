@@ -200,6 +200,7 @@ Notice the behaviour ...
 
 ```php
 $aclService1 = $serviceLocator->get('AclService\Ex1');
+$aclService1->init(); // to load role
 $aclService1->isAllowed('Role1', 'Resource1', 'add'); // TRUE
 $aclService1->isAllowed('Role1', 'Resource2', 'view'); // FALSE
 // ...
