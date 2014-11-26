@@ -16,6 +16,7 @@ use AclManTest\Integration\Service\TestAsset\Assertion\Assertion1;
 use AclManTest\Integration\Service\TestAsset\Assertion\Assertion2;
 use Zend\Permissions\Acl\Acl;
 use Zend\Mvc\Service\ServiceManagerConfig;
+use Zend\Permissions\Acl\Assertion\AssertionManager;
 use Zend\ServiceManager;
 
 /**
@@ -110,7 +111,7 @@ class ServiceAbstractTest extends AclManTestCase
         );
 
         $this->serviceManager->setService('Config', $config);
-        $this->serviceManager->setService('PluginManager', new AssertionPluginManager());
+        $this->serviceManager->setService('PluginManager', new AssertionManager());
     }
 
 

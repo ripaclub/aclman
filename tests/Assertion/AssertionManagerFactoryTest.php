@@ -11,6 +11,7 @@ namespace AclManTest\Assertion;
 use AclManTest\AclManTestCase;
 use AclManTest\Assertion\TestAsset\MockAssertionPluginManager;
 use Zend\Mvc\Service\ServiceManagerConfig;
+use Zend\Permissions\Acl\Assertion\AssertionManager;
 use Zend\ServiceManager;
 
 /**
@@ -41,17 +42,17 @@ class AssertionManagerFactoryTest extends AclManTestCase
     public function testAssertPluginManager()
     {
         $pluginManager = $this->serviceManager->get('assertManager');
-        $this->assertInstanceOf('AclMan\Assertion\AssertionPluginManager', $pluginManager);
+        $this->assertInstanceOf('Zend\Permissions\Acl\Assertion\AssertionManager', $pluginManager);
     }
 
-    public function testAssetPluginManagerCustom()
+    public function testAssetPluginManagerConfig()
     {
         $config = [
             'factories' => [
                 'assertManager' => 'AclMan\Assertion\AssertionManagerFactory',
             ],
-            'invokables' => [
-                'AclMan\Plugin\Manager' => 'AclManTest\Assertion\TestAsset\MockAssertionPluginManager'
+            'aclman-assertion-manager' => [
+                'AclManTest\Assertion\TestAsset\Assertion\MockAssertion1' => 'AclManTest\Assertion\TestAsset\Assertion\MockAssertion1'
             ]
         ];
 
@@ -61,9 +62,14 @@ class AssertionManagerFactoryTest extends AclManTestCase
 
         $sm->setService('Config', $config);
 
-        /** @var $pluginManager MockAssertionPluginManager */
+        /** @var $pluginManager AssertionManager */
         $pluginManager = $sm->get('assertManager');
-        $this->assertInstanceOf('AclManTest\Assertion\TestAsset\MockAssertionPluginManager', $pluginManager);
+        $this->assertInstanceOf('Zend\Permissions\Acl\Assertion\AssertionManager', $pluginManager);
+        $this->assertInstanceOf(
+            'Zend\Permissions\Acl\Assertion\AssertionInterface',
+            $pluginManager->get('AclManTest\Assertion\TestAsset\Assertion\MockAssertion1')
+        );
+
     }
 
 }

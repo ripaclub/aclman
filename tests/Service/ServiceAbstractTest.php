@@ -14,6 +14,7 @@ use AclManTest\AclManTestCase;
 use AclManTest\Assertion\TestAsset\Assertion\MockAssertion1;
 use AclManTest\Assertion\TestAsset\MockAssertionPluginManager;
 use Zend\Permissions\Acl\Acl;
+use Zend\Permissions\Acl\Assertion\AssertionManager;
 
 /**
  * Class ServiceAbstractTest
@@ -212,7 +213,8 @@ class ServiceAbstractTest extends AclManTestCase
     {
         $this->service->addRole('role1');
 
-        $pluginManager = new MockAssertionPluginManager();
+        $pluginManager = new AssertionManager();
+
         $pluginManager->setService('testAssert', new MockAssertion1());
 
         $mockStorage = $this->getMockBuilder('AclMan\Storage\Adapter\ArrayAdapter\ArrayAdapter')

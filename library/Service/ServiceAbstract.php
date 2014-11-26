@@ -39,8 +39,10 @@ class ServiceAbstract implements ServiceInterface
             // Add Role
             $roles = $this->getStorage()->getRoles();
             foreach ($roles as $role) {
-                $roleParents = $this->getStorage()->getParentRoles($role);
-                $this->getAcl()->addRole($role, $roleParents);
+                if (!$this->hasRole($role)) {
+                    $roleParents = $this->getStorage()->getParentRoles($role);
+                    $this->getAcl()->addRole($role, $roleParents);
+                }
             }
         }
         return $this;
