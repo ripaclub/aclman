@@ -42,14 +42,18 @@ class ServiceAbstractTest extends AclManTestCase
                                     [
                                         'assert' => null,
                                         'allow' => true,
-                                        'privilege' => 'view'
+                                        'privileges' => [
+                                            'view'
+                                        ]
                                     ]
                                 ],
                                 'resource2' => [
                                     [
                                         'assert' => 'assertFalse',
                                         'allow' => true,
-                                        'privilege' => 'view'
+                                        'privileges' => [
+                                            'view'
+                                        ]
                                     ]
                                 ]
                             ]
@@ -63,21 +67,25 @@ class ServiceAbstractTest extends AclManTestCase
                                     [
                                         'assert' => null,
                                         'allow' => true,
-                                        'privilege' => 'add'
+                                        'privileges' => [
+                                            'add',
+                                            'view' => [
+                                                'allow' => false,
+                                            ]
+                                        ]
                                     ]
                                 ],
                                 'resource2' => [
                                     [
                                         'assert' => null,
                                         'allow' => true,
-                                        'privilege' => 'add'
-                                    ],
-                                    [
-                                        'assert' => 'assertTrue',
-                                        'allow' => true,
-                                        'privilege' => 'view'
+                                        'privileges' => [
+                                            'add',
+                                            'view' => [
+                                                'assert' => 'assertTrue',
+                                            ]
+                                        ]
                                     ]
-
                                 ]
                             ]
                         ],
@@ -142,6 +150,7 @@ class ServiceAbstractTest extends AclManTestCase
         $acl->allow('role1', 'resource2', 'view', new Assertion1());
         $acl->addRole('role2', ['role1']);
         $acl->allow('role2', 'resource1', 'add');
+        $acl->deny('role2', 'resource1', 'view');
         $acl->allow('role2', 'resource2', 'add');
         $acl->allow('role2', 'resource2', 'view', new Assertion2());
 

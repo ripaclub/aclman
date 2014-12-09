@@ -54,9 +54,33 @@ class ArrayAdapter implements StorageInterface
                         }
                         if (is_array($permissions)) {
                             foreach ($permissions as $permission) {
-                                $permission['role'] = $role;
-                                $permission['resource'] = $resource;
-                                $this->addPermission($permission);
+                                if (is_array($permission)
+                                    && isset($permission['privileges'])
+                                    && is_array($permission['privileges'])
+                                ) {
+                                    foreach ($permission['privileges'] as $key => $nestedPermission) {
+                                        $perm = $permission;
+                                        $perm['role'] = $role;
+                                        $perm['resource'] = $resource;
+
+                                        if (is_array($nestedPermission)) {
+                                            $perm['privilege'] = $key;
+                                            if (isset($nestedPermission['allow'])) {
+                                                $perm['allow'] = $nestedPermission['allow'];
+                                            }
+                                            if (isset($nestedPermission['assert'])) {
+                                                $perm['assert'] = $nestedPermission['assert'];
+                                            }
+                                        } else {
+                                            $perm['privilege'] = $nestedPermission;
+                                        }
+                                        $this->addPermission($perm);
+                                    }
+                                } else {
+                                    $permission['role'] = $role;
+                                    $permission['resource'] = $resource;
+                                    $this->addPermission($permission);
+                                }
                             }
                         }
                     }
