@@ -8,8 +8,7 @@
  */
 namespace AclManTest\Service;
 
-use AclMan\Permission\GenericPermission;
-use AclMan\Service\ServiceImplement;
+use AclMan\Service\Service;
 use AclManTest\AclManTestCase;
 use AclManTest\Assertion\TestAsset\Assertion\MockAssertion1;
 use AclManTest\Assertion\TestAsset\MockAssertionPluginManager;
@@ -22,13 +21,13 @@ use Zend\Permissions\Acl\Assertion\AssertionManager;
 class ServiceAbstractTest extends AclManTestCase
 {
     /**
-     * @var $service ServiceImplement
+     * @var $service Service
      */
     protected $service;
 
     public function setUp()
     {
-        $this->service = new ServiceImplement();
+        $this->service = new Service();
 
         $this->service->setAcl(new Acl());
     }

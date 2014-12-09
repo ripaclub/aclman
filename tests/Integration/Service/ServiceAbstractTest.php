@@ -8,8 +8,7 @@
  */
 namespace AclManTest\Integration\Service;
 
-use AclMan\Assertion\AssertionPluginManager;
-use AclMan\Service\ServiceImplement;
+use AclMan\Service\Service;
 use AclManTest\AclManTestCase;
 use AclMan\Storage\Adapter\ArrayAdapter\ArrayAdapter;
 use AclManTest\Integration\Service\TestAsset\Assertion\Assertion1;
@@ -125,7 +124,7 @@ class ServiceAbstractTest extends AclManTestCase
      */
     public function testHasRole()
     {
-        /** @var $service ServiceImplement */
+        /** @var $service Service */
         $service = $this->serviceManager->get('AclService');
         $this->assertFalse($service->hasRole('role1'));
 
@@ -146,7 +145,7 @@ class ServiceAbstractTest extends AclManTestCase
         $acl->allow('role2', 'resource2', 'add');
         $acl->allow('role2', 'resource2', 'view', new Assertion2());
 
-        /** @var $service ServiceImplement */
+        /** @var $service Service */
         $service = $this->serviceManager->get('AclService');
         $service->init();
 
