@@ -93,7 +93,7 @@ class ServiceAbstract implements ServiceInterface
      */
     public function loadResource($role = null, $resource = null)
     {
-        if ($resource && $this->getStorage()->hasResource($resource) && !$this->getAcl()->hasResource($resource)) {
+        if ($resource && !$this->getAcl()->hasResource($resource)) {
             $this->getAcl()->addResource($resource);
         }
 
