@@ -93,10 +93,6 @@ class ServiceAbstract implements ServiceInterface
      */
     public function loadResource($role = null, $resource = null)
     {
-        if ($resource && !$this->getAcl()->hasResource($resource)) {
-            $this->getAcl()->addResource($resource);
-        }
-
         $permissions = $this->getStorage()->getPermissions($role, $resource);
         if ($this->getStorage()->hasResource($resource) && count($permissions) > 0) {
             /* @var $permission GenericPermission */
@@ -106,13 +102,19 @@ class ServiceAbstract implements ServiceInterface
                     $assert = $this->getPluginManager()->get($permission->getAssertion());
                 }
 
+                if (!$this->getAcl()->hasResource($permission->getResourceId())) {
+                    $this->getAcl()->addResource($permission->getResourceId());
+                }
+
                 if ($permission->isAllow()) {
-//                    var_dump(sprintf(
-//                        'ALLOW: role "%s" resource "%s" privilege "%s"',
-//                        $permission->getRoleId(),
-//                        $permission->getResourceId(),
-//                        $permission->getPrivilege()
-//                    ));
+                    /*
+                        var_dump(sprintf(
+                        'ALLOW: role "%s" resource "%s" privilege "%s"',
+                        $permission->getRoleId(),
+                        $permission->getResourceId(),
+                        $permission->getPrivilege()
+                    ));
+                    */
                     $this->getAcl()->allow(
                         $permission->getRoleId(),
                         $permission->getResourceId(),
@@ -120,12 +122,14 @@ class ServiceAbstract implements ServiceInterface
                         $assert
                     );
                 } else {
-//                    var_dump(sprintf(
-//                        'DENY: role "%s" resource "%s" privilege "%s"',
-//                        $permission->getRoleId(),
-//                        $permission->getResourceId(),
-//                        $permission->getPrivilege()
-//                    ));
+                    /*
+                    var_dump(sprintf(
+                        'DENY: role "%s" resource "%s" privilege "%s"',
+                        $permission->getRoleId(),
+                        $permission->getResourceId(),
+                        $permission->getPrivilege()
+                    ));
+                    */
                     $this->getAcl()->deny(
                         $permission->getRoleId(),
                         $permission->getResourceId(),
