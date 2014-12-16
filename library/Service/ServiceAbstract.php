@@ -28,25 +28,15 @@ class ServiceAbstract implements ServiceInterface
     use RoleCheckTrait;
     use AssertionAwareTrait;
 
+    /**
+     * @var bool
+     */
     protected $allowNotFoundResource = false;
 
     /**
-     * {@inheritdoc}
+     * @var bool
      */
-    public function init()
-    {
-        if ($this->getStorage()) {
-            // Add Role
-            $roles = $this->getStorage()->getRoles();
-            foreach ($roles as $role) {
-                if (!$this->hasRole($role)) {
-                    $roleParents = $this->getStorage()->getParentRoles($role);
-                    $this->getAcl()->addRole($role, $roleParents);
-                }
-            }
-        }
-        return $this;
-    }
+    protected $loaded = [];
 
     /**
      * Add roles from storage
@@ -93,28 +83,52 @@ class ServiceAbstract implements ServiceInterface
      */
     public function loadResource($role = null, $resource = null)
     {
+        $role = ($role instanceof Role\RoleInterface) ? $role->getRoleId() : $role;
+        $resource = ($resource instanceof Resource\ResourceInterface) ? $resource->getResourceId() : $resource;
+        // star recursion
+        if (isset($this->loaded[(string)$role]) && isset($this->loaded[(string)$role][(string)$resource])) {
+            return;
+        }
+
+
+        if (!isset($this->loaded[(string)$role])) {
+            $this->loaded[(string)$role] = [];
+        }
+        $this->loaded[(string)$role][(string)$resource] = true;
+
+        if ($role || $resource) {
+            $this->loadResource();
+        }
+
+        if ($role && $resource) {
+            $this->loadResource(null, $resource);
+            $this->loadResource($role, null);
+        }
+        // end recursion
+
+        if ($role && !$this->getAcl()->hasRole($role)) {
+            $this->getAcl()->addRole($role);
+        }
+
+        if ($resource && !$this->getAcl()->hasResource($resource)) {
+            $this->getAcl()->addResource($resource);
+        }
+
         $permissions = $this->getStorage()->getPermissions($role, $resource);
-        if ($this->getStorage()->hasResource($resource) && count($permissions) > 0) {
+        //var_dump($permissions);
+        if (count($permissions) > 0) {
             /* @var $permission GenericPermission */
             foreach ($permissions as $permission) {
                 $assert = null;
                 if ($permission->getAssertion()) {
                     $assert = $this->getPluginManager()->get($permission->getAssertion());
                 }
-
-                if (!$this->getAcl()->hasResource($permission->getResourceId())) {
+                // When load multiple resource
+                if ($permission->getResourceId() && !$this->getAcl()->hasResource($permission->getResourceId())) {
                     $this->getAcl()->addResource($permission->getResourceId());
                 }
 
                 if ($permission->isAllow()) {
-                    /*
-                        var_dump(sprintf(
-                        'ALLOW: role "%s" resource "%s" privilege "%s"',
-                        $permission->getRoleId(),
-                        $permission->getResourceId(),
-                        $permission->getPrivilege()
-                    ));
-                    */
                     $this->getAcl()->allow(
                         $permission->getRoleId(),
                         $permission->getResourceId(),
@@ -122,14 +136,6 @@ class ServiceAbstract implements ServiceInterface
                         $assert
                     );
                 } else {
-                    /*
-                    var_dump(sprintf(
-                        'DENY: role "%s" resource "%s" privilege "%s"',
-                        $permission->getRoleId(),
-                        $permission->getResourceId(),
-                        $permission->getPrivilege()
-                    ));
-                    */
                     $this->getAcl()->deny(
                         $permission->getRoleId(),
                         $permission->getResourceId(),

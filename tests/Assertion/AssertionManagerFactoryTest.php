@@ -52,7 +52,10 @@ class AssertionManagerFactoryTest extends AclManTestCase
                 'assertManager' => 'AclMan\Assertion\AssertionManagerFactory',
             ],
             'aclman-assertion-manager' => [
-                'AclManTest\Assertion\TestAsset\Assertion\MockAssertion1' => 'AclManTest\Assertion\TestAsset\Assertion\MockAssertion1'
+                'AclManTest\Assertion\TestAsset\Assertion\MockAssertion1' => 'AclManTest\Assertion\TestAsset\Assertion\MockAssertion1',
+                'invokables' => [
+                    'assert' => 'AclManTest\Assertion\TestAsset\Assertion\MockAssertion1',
+                ]
             ]
         ];
 
@@ -69,7 +72,10 @@ class AssertionManagerFactoryTest extends AclManTestCase
             'Zend\Permissions\Acl\Assertion\AssertionInterface',
             $pluginManager->get('AclManTest\Assertion\TestAsset\Assertion\MockAssertion1')
         );
-
+        $this->assertInstanceOf(
+            'Zend\Permissions\Acl\Assertion\AssertionInterface',
+            $pluginManager->get('assert')
+        );
     }
 
 }

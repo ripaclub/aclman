@@ -32,40 +32,6 @@ class ServiceAbstractTest extends AclManTestCase
         $this->service->setAcl(new Acl());
     }
 
-    public function testServiceAbstractInit()
-    {
-        $mockStorage = $this->getMockBuilder('AclMan\Storage\Adapter\ArrayAdapter\ArrayAdapter')
-            ->disableOriginalConstructor()
-            ->getMock();
-
-        $mockStorage->expects($this->any())
-            ->method('getRoles')
-            ->will($this->returnValue([]));
-
-        $this->service->setStorage($mockStorage);
-        $this->service->init();
-
-        $this->assertEmpty($this->service->getRoles());
-
-        $mockStorage = $this->getMockBuilder('AclMan\Storage\Adapter\ArrayAdapter\ArrayAdapter')
-            ->disableOriginalConstructor()
-            ->getMock();
-
-        $mockStorage->expects($this->any())
-            ->method('getRoles')
-            ->will($this->returnValue(['test', 'test1']));
-
-        $this->service->setStorage($mockStorage);
-        $this->service->init();
-
-        $this->assertNotEmpty($this->service->getRoles());
-
-        $this->assertTrue($this->service->hasRole('test1'));
-        $this->assertInstanceOf('Zend\Permissions\Acl\Role\RoleInterface', $this->service->getRole('test1'));
-
-        $this->assertSame($this->service, $this->service->addRole('test2'));
-    }
-
     public function testHasRole()
     {
         $this->assertFalse($this->service->hasRole('role1'));
@@ -74,6 +40,21 @@ class ServiceAbstractTest extends AclManTestCase
     public function testAddRole()
     {
         $this->assertSame($this->service, $this->service->addRole('role1'));
+    }
+
+    /**
+     * @depends testAddRole
+     */
+    public function testGetRole()
+    {
+        $this->service->addRole('role1');
+        $this->assertInstanceOf('Zend\Permissions\Acl\Role\RoleInterface', $this->service->getRole('role1'));
+    }
+
+    public function testGetRoles()
+    {
+        $this->service->addRole('role1');
+        $this->assertCount(1, $this->service->getRoles());
     }
 
     public function testServiceAbstractAllowNotFoundResource()

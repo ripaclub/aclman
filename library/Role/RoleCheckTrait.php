@@ -22,8 +22,12 @@ trait RoleCheckTrait
      * @return GenericRole
      * @throws InvalidParameterException
      */
-    private function checkRole($role)
+    private function checkRole($role = null)
     {
+        if (is_null($role)) {
+            return $role;
+        }
+
         if (is_string($role)) {
             $role = new GenericRole($role);
         }

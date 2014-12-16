@@ -291,9 +291,6 @@ class ArrayAdapterTest extends AclManTestCase
      */
     public function testAddPermission()
     {
-        $this->adapter->addRoles(['role1']);
-        $this->adapter->addResource('resource1');
-
         $permission = $this->getMockBuilder('AclMan\Permission\GenericPermission')
             ->disableOriginalConstructor()
             ->setMethods(['getAssertion', 'isAllow', 'getPrivilege', 'getResourceId', 'getRoleId'])
@@ -326,11 +323,8 @@ class ArrayAdapterTest extends AclManTestCase
     /**
      * @depends testAddRole
      */
-    public function testAddPermissionNoRoleNoResource()
+    public function testAddAllPermissionForOneRole()
     {
-        $this->adapter->addRoles(['role1']);
-        $this->adapter->addResource('resource1');
-
         $permission = $this->getMockBuilder('AclMan\Permission\GenericPermission')
             ->disableOriginalConstructor()
             ->setMethods(['getAssertion', 'isAllow', 'getPrivilege', 'getResourceId', 'getRoleId'])
@@ -338,7 +332,7 @@ class ArrayAdapterTest extends AclManTestCase
 
         $permission->expects($this->any())
             ->method('getRoleId')
-            ->will($this->returnValue(null));
+            ->will($this->returnValue('role1'));
 
         $permission->expects($this->any())
             ->method('getResourceId')
@@ -356,17 +350,15 @@ class ArrayAdapterTest extends AclManTestCase
             ->method('isAllow')
             ->will($this->returnValue(true));
 
-        $this->assertSame($this->adapter, $this->adapter->addPermission($permission));
+        $this->adapter->addPermission($permission);
+        $this->assertCount(1, $this->adapter->getPermissions('role1', null));
     }
 
     /**
      * @depends testAddPermission
-     * @expectedException \AclMan\Exception\ResourceNotExistException
      */
-    public function testAddPermissionException1()
+    public function testAddAllPermissionForAllRoles()
     {
-        $this->adapter->addRoles(['role1']);
-
         $permission = $this->getMockBuilder('AclMan\Permission\GenericPermission')
             ->disableOriginalConstructor()
             ->setMethods(['getAssertion', 'isAllow', 'getPrivilege', 'getResourceId', 'getRoleId'])
@@ -374,11 +366,11 @@ class ArrayAdapterTest extends AclManTestCase
 
         $permission->expects($this->any())
             ->method('getRoleId')
-            ->will($this->returnValue('role1'));
+            ->will($this->returnValue(null));
 
         $permission->expects($this->any())
             ->method('getResourceId')
-            ->will($this->returnValue('resource1'));
+            ->will($this->returnValue(null));
 
         $permission->expects($this->any())
             ->method('getPrivilege')
@@ -394,41 +386,7 @@ class ArrayAdapterTest extends AclManTestCase
 
 
         $this->adapter->addPermission($permission);
-    }
-
-    /**
-     * @depends testAddPermission
-     * @expectedException \AclMan\Exception\RoleNotExistException
-     */
-    public function testAddPermissionException2()
-    {
-        $permission = $this->getMockBuilder('AclMan\Permission\GenericPermission')
-            ->disableOriginalConstructor()
-            ->setMethods(['getAssertion', 'isAllow', 'getPrivilege', 'getResourceId', 'getRoleId'])
-            ->getMock();
-
-        $permission->expects($this->any())
-            ->method('getRoleId')
-            ->will($this->returnValue('role1'));
-
-        $permission->expects($this->any())
-            ->method('getResourceId')
-            ->will($this->returnValue('resource1'));
-
-        $permission->expects($this->any())
-            ->method('getPrivilege')
-            ->will($this->returnValue('test'));
-
-        $permission->expects($this->any())
-            ->method('getAssertion')
-            ->will($this->returnValue(null));
-
-        $permission->expects($this->any())
-            ->method('isAllow')
-            ->will($this->returnValue(true));
-
-
-        $this->adapter->addPermission($permission);
+        $this->assertCount(1, $this->adapter->getPermissions(null, null));
     }
 
     /**

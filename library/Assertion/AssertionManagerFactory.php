@@ -36,7 +36,6 @@ class AssertionManagerFactory implements FactoryInterface
     {
         $config = $serviceLocator->get('Config');
         $configManager = (isset($config['aclman-assertion-manager'])) ? new Config($config['aclman-assertion-manager']) : null;
-
         return new AssertionManager($configManager);
     }
 }

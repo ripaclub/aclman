@@ -22,9 +22,9 @@ interface StorageInterface
     const NODE_PERMISSION   = 'permission';
     const NODE_PARENTS_ROLE = 'parents';
 
-    const ALL_ROLES         = 'all-roles';
-    const ALL_RESOURCES     = 'all-resources';
-    const ALL_PRIVILEGES    = 'all-privileges';
+    const ALL_ROLES         = '#roles#';
+    const ALL_RESOURCES     = '#resources#';
+    const ALL_PRIVILEGES    = '#privileges#';
 
     /**
      * @param $role
