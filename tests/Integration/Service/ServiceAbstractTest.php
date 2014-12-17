@@ -292,7 +292,6 @@ class ServiceAbstractTest extends AclManTestCase
         $acl->addResource('resource2');
         $acl->addResource('resource3');
 
-
         $acl->allow('role1', null, null);
 
         $service = $this->serviceManager->get('AclService3');
