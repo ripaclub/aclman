@@ -30,7 +30,7 @@ class ServiceFactory implements AbstractFactoryInterface
      *
      * @var string
      */
-    protected $serviceName = 'AclMan\Service\ServiceImplement';
+    protected $serviceName = 'AclMan\Service\Service';
 
     /**
      * Config
@@ -96,7 +96,7 @@ class ServiceFactory implements AbstractFactoryInterface
 
         // Config Service
         $acl = new Acl();
-        /* @var ServiceImplement $service */
+        /* @var Service $service */
         $service->setStorage($storage);
         $service->setAcl($acl);
         $service->setPluginManager($pluginManager);

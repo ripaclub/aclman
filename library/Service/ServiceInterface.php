@@ -17,13 +17,6 @@ use Zend\Permissions\Acl\Resource\ResourceInterface;
 interface ServiceInterface extends AclInterface
 {
     /**
-     * Load roles from storage
-     *
-     * @return self
-     */
-    public function init();
-
-    /**
      * @param null $role
      * @param ResourceInterface|null $resource
      * @return bool

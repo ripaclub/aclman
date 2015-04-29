@@ -29,7 +29,7 @@ class ServiceFactoryTest extends AclManTestCase
             'aclman_services' => [
                 'AclService' => [
                     'storage' => 'ArrayStorage1',
-                    'plugin_manager' => 'PluginManager',
+                    'plugin_manager' => 'Zend\Permissions\Acl\Assertion\AssertionManager',
                     'allow_not_found_resource' => true
                 ],
                 'AclService1' => [],
@@ -41,6 +41,9 @@ class ServiceFactoryTest extends AclManTestCase
                     'abstract_factories' => [
                         'AclMan\Service\ServiceFactory',
                     ],
+                    'factories' => [
+                        'Zend\Permissions\Acl\Assertion\AssertionManager' => 'AclMan\Assertion\AssertionManagerFactory'
+                    ]
                 ]
             )
         );
@@ -48,8 +51,6 @@ class ServiceFactoryTest extends AclManTestCase
         $this->serviceManager->setService('Config', $config);
         $adapter = $this->getMockBuilder('AclMan\Storage\StorageInterface')->getMock();
         $this->serviceManager->setService('ArrayStorage1', $adapter);
-        $pluginManager = $this->getMockBuilder('AclMan\Assertion\AssertionPluginManager')->getMock();
-        $this->serviceManager->setService('PluginManager', $pluginManager);
     }
 
     public function testCreateServiceShouldThrowServiceNotCreatedExceptionWhenStorageIsInvalid()

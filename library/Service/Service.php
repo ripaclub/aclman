@@ -9,8 +9,8 @@
 namespace AclMan\Service;
 
 /**
- * Class ServiceImplement
+ * Class Service
  */
-class ServiceImplement extends ServiceAbstract
+class Service extends ServiceAbstract
 {
 }

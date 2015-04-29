@@ -49,14 +49,38 @@ class ArrayAdapter implements StorageInterface
                 $this->addRole($role, $parents);
                 if (is_array($resources) && isset($resources[self::NODE_RESOURCES])) {
                     foreach ($resources[self::NODE_RESOURCES] as $resource => $permissions) {
-                        if (!$this->hasResource($resource)) {
+                        if ($resource && !$this->hasResource($resource)) {
                             $this->addResource($resource);
                         }
                         if (is_array($permissions)) {
                             foreach ($permissions as $permission) {
-                                $permission['role'] = $role;
-                                $permission['resource'] = $resource;
-                                $this->addPermission($permission);
+                                if (is_array($permission)
+                                    && isset($permission['privileges'])
+                                    && is_array($permission['privileges'])
+                                ) {
+                                    foreach ($permission['privileges'] as $key => $nestedPermission) {
+                                        $perm = $permission;
+                                        $perm['role'] = $role;
+                                        $perm['resource'] = $resource;
+
+                                        if (is_array($nestedPermission)) {
+                                            $perm['privilege'] = $key;
+                                            if (isset($nestedPermission['allow'])) {
+                                                $perm['allow'] = $nestedPermission['allow'];
+                                            }
+                                            if (isset($nestedPermission['assert'])) {
+                                                $perm['assert'] = $nestedPermission['assert'];
+                                            }
+                                        } else {
+                                            $perm['privilege'] = $nestedPermission;
+                                        }
+                                        $this->addPermission($perm);
+                                    }
+                                } else {
+                                    $permission['role'] = $role;
+                                    $permission['resource'] = $resource;
+                                    $this->addPermission($permission);
+                                }
                             }
                         }
                     }
@@ -231,7 +255,7 @@ class ArrayAdapter implements StorageInterface
     public function addResource($resource)
     {
         $resource = $this->checkResource($resource);
-        if ($this->hasResource($resource)) {
+        if ($resource && $this->hasResource($resource)) {
             throw new ResourceAlreadyExistException(sprintf(
                 'Resource %s already stored',
                 $resource->getResourceId()
@@ -264,15 +288,14 @@ class ArrayAdapter implements StorageInterface
     {
         $role = $this->getRolePermission(new GenericPermission(['role' => $role]));
         $result = [];
-
         if ($resource) {
             $resource = $this->checkResource($resource);
             if(isset($this->permission[$role->getRoleId()][self::NODE_RESOURCES][$resource->getResourceId()][self::NODE_PERMISSION])) {
                 $listPermission = $this->permission[$role->getRoleId()][self::NODE_RESOURCES][$resource->getResourceId()][self::NODE_PERMISSION];
                 foreach ($listPermission as $permission) {
 
-                    $permission['role'] = $role->getRoleId();
-                    $permission['resource'] = $resource->getResourceId();
+                    $permission['role'] = ($role->getRoleId() == StorageInterface::ALL_ROLES) ? null : $role->getRoleId();
+                    $permission['resource'] = ($resource->getResourceId() == StorageInterface::ALL_RESOURCES) ? null : $resource->getResourceId();
 
                     $obj = new GenericPermission($permission);
                     array_push($result, $obj);
@@ -285,8 +308,8 @@ class ArrayAdapter implements StorageInterface
                 foreach ($listResource as $keyResource => $listPermission) {
                     foreach ($listPermission[self::NODE_PERMISSION] as $permission) {
 
-                        $permission['role'] = $role->getRoleId();
-                        $permission['resource'] = ($keyResource != self::ALL_RESOURCES) ? $keyResource : null;
+                        $permission['role'] = ($role->getRoleId() == StorageInterface::ALL_ROLES) ? null : $role->getRoleId();
+                        $permission['resource'] = ($keyResource == StorageInterface::ALL_RESOURCES) ? null : $keyResource;
 
                         $obj = new GenericPermission($permission);
                         array_push($result, $obj);
@@ -294,7 +317,6 @@ class ArrayAdapter implements StorageInterface
                 }
             }
         }
-
         return $result;
     }
 
@@ -344,14 +366,13 @@ class ArrayAdapter implements StorageInterface
     protected function getRolePermission(GenericPermission $permission)
     {
         if ($permission->getRoleId()) {
-            if (!$this->hasRole(new GenericRole($permission->getRoleId()))) {
-                throw new RoleNotExistException(sprintf('Role %s not stored', $permission->getRoleId()));
+            if ($permission->getRoleId() && !$this->hasRole(new GenericRole($permission->getRoleId()))) {
+                $this->addRole($permission->getRoleId());
             }
             $role = new GenericRole($permission->getRoleId());
         } else {
             $role = new GenericRole(self::ALL_ROLES);
         }
-
         return $role;
     }
 
@@ -364,11 +385,8 @@ class ArrayAdapter implements StorageInterface
     {
         if ($permission->getResourceId()) {
             // Check if resource is already stored
-            if (!$this->hasResource(new GenericResource($permission->getResourceId()))) {
-                throw new ResourceNotExistException(sprintf(
-                    'Resource %s not stored',
-                    $permission->getResourceId()
-                ));
+            if ($permission->getResourceId() && !$this->hasResource(new GenericResource($permission->getResourceId()))) {
+                $this->addResource($permission->getResourceId());
             }
             $resource = new GenericResource($permission->getResourceId());
         } else {
@@ -388,8 +406,8 @@ class ArrayAdapter implements StorageInterface
     {
         $resource = $this->checkResource($resource);
         $role = $this->checkRole($role);
-        $roleId = $role->getRoleId();
-        $resrcId = $resource->getResourceId();
+        $roleId = ($role->getRoleId() == null) ? StorageInterface::ALL_ROLES : $role->getRoleId();
+        $resrcId = ($resource->getResourceId() == null) ? StorageInterface::ALL_RESOURCES : $resource->getResourceId();
         if (!isset($this->permission[$roleId][self::NODE_RESOURCES][$resrcId][self::NODE_PERMISSION])) {
             $this->permission[$roleId][self::NODE_RESOURCES][$resrcId][self::NODE_PERMISSION] = [];
         }

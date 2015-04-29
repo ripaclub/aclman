@@ -22,14 +22,21 @@ trait ResourceCheckTrait
      * @return GenericResource
      * @throws InvalidParameterException
      */
-    private function checkResource($resource)
+    private function checkResource($resource = null)
     {
+        if (is_null($resource)) {
+            return $resource;
+        }
+
         if (is_string($resource)) {
             $resource = new GenericResource($resource);
         }
 
         if (!$resource instanceof ResourceInterface) {
-            throw new InvalidParameterException('Invalid type resource');
+            throw new InvalidParameterException(sprintf(
+                'Invalid type resource "%s"',
+                (is_object($resource) ? get_class($resource) : gettype($resource))
+            ));
         }
 
         return $resource;

@@ -1,5 +1,5 @@
-ACL manager
-===========
+ACL manager [![Latest Stable Version](https://poser.pugx.org/ripaclub/aclman/v/stable.png)](https://packagist.org/packages/ripaclub/aclman)
+============
 
 AclMan is a PHP library designed to manage access control list (ACL).
 
@@ -7,6 +7,13 @@ AclMan is a PHP library designed to manage access control list (ACL).
 |:-------------:|:-------------:|:-------------:|:-------------:|
 |master|[![Build Status](https://travis-ci.org/ripaclub/aclman.svg?branch=master)](https://travis-ci.org/ripaclub/aclman) |[![Coverage Status](https://coveralls.io/repos/ripaclub/aclman/badge.png?branch=master)](https://coveralls.io/r/ripaclub/aclman)|[![Dependency Status](https://www.versioneye.com/user/projects/544efbb39fc4d5226e0000ec/badge.svg)](https://www.versioneye.com/user/projects/544efbb39fc4d5226e0000ec)|
 |develop|[![Build Status](https://travis-ci.org/ripaclub/aclman.svg?branch=develop)](https://travis-ci.org/ripaclub/aclman)|[![Coverage Status](https://coveralls.io/repos/ripaclub/aclman/badge.png?branch=develop)](https://coveralls.io/r/ripaclub/aclman?branch=develop)|[![Dependency Status](https://www.versioneye.com/user/projects/544efb509fc4d5e91300017c/badge.svg)](https://www.versioneye.com/user/projects/544efb509fc4d5e91300017c)|
+
+Requisites
+----------
+
+* PHP >= 5.4
+
+* Composer
 
 Features
 --------
@@ -81,6 +88,13 @@ Then we configure our service.
         'plugin_manager' => 'AclMan\Assertion\AssertionManager',
     ],
 ]
+'aclman-assertion-manager' => [
+    'invokables' => [
+        'assertAlias' => 'assertionClass',
+        ...
+        ...
+    ]
+]
 ```
 
 Finally, our storage configuration.
@@ -89,6 +103,7 @@ Finally, our storage configuration.
 'aclman_storage' => [
     'AclStorage\Ex1' => [
         'roles' => [
+             // Config specific permission for role Role1 to resources Resource1 and Resource2
             'Role1' => [
                 'resources' => [
                     'Resource1' => [
@@ -100,12 +115,32 @@ Finally, our storage configuration.
                     ],
                     'Resource2' => [
                         [
-                            'assert' => null,
+                            'assert' => 'assertAlias',
                             'allow' => true,
                             'privilege' => 'view'
                         ]
                     ]
                 ],
+            ],
+            // Config specific permission for all roles to resource Resource1 (e.x public resource)
+            StorageInterface::ALL_ROLES => [
+                'resources' => [
+                    'Resource3' => [
+                        [
+                            'allow' => true,
+                        ]
+                    ],
+                ]
+            ],
+            // Config specific permission for Admin to all resource (e.x access to al resource to the admin)
+            'Admin' => [
+                'resources' => [
+                    StorageInterface::ALL_RESOURCES  => [
+                        [
+                            'allow' => true,
+                        ]
+                    ],
+                ]
             ],
         ],
     ],
@@ -119,74 +154,6 @@ $aclService1 = $serviceLocator->get('AclService\Ex1');
 $aclService1->isAllowed('Role1', 'Resource1', 'view'); // FALSE
 $aclService1->isAllowed('Role1', 'Resource1', 'add'); // TRUE
 // ...
-```
-
-Usage (2)
----------
-
-Now we see how to modify the previous example in order to use the `AssertionManager`.
-
-We can do it in two ways: (1) create an assertion plugin manager or (2) fetch the provided `AssertionPluginManager` and add our assertions.
-
-We suggest you to create your own assertion plugin manager (1). For example:
-
-```php
-namespace Ex1;
-class OurAssertionPluginManager extends AbstractPluginManager
-{
-    protected $invokableClasses = [
-        'assertFalse' => 'Ex1\Assertion\Assertion1',
-        'assertTrue' => 'Ex1\Assertion\Assertion2',
-    ];
-
-    public function validatePlugin($plugin)
-    {
-        if ($plugin instanceof AssertionInterface) {
-            return;
-        }
-        throw new \Exception(sprintf(
-            'Plugin of type "%s" is invalid; must implement Zend\Permissions\Acl\Assertion\AssertionInterface',
-            (is_object($plugin) ? get_class($plugin) : gettype($plugin))
-        ));
-    }
-}
-```
-
-Now we need to register it in the service manager to load our assertion plugin manager.
-
-```php
-'invokables' => [
-    'AclMan\Plugin\Manager' => 'Ex1\OurAssertionPluginManager'
-]
-```
-
-Finally we can use our new assertions (see `(*)` in the comments) to configure roles:
-
-```php
-'aclman_storage' => [
-    'AclStorage\Ex1' => [
-        'roles' => [
-            'Role1' => [
-                'resources' => [
-                    'Resource1' => [
-                        [
-                            'assert' => 'assertTrue', // (*)
-                            'allow' => true,
-                            'privilege' => 'add'
-                        ]
-                    ],
-                    'Resource2' => [
-                        [
-                            'assert' => 'assertFalse', // (*)
-                            'allow' => true,
-                            'privilege' => 'view'
-                        ]
-                    ]
-                ],
-            ],
-        ],
-    ],
-]
 ```
 
 Notice the behaviour ...

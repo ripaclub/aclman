@@ -9,6 +9,7 @@
 namespace AclManTest\Assertion;
 
 use AclManTest\AclManTestCase;
+use Zend\Permissions\Acl\Assertion\AssertionManager;
 
 /**
  * Class AssertionAwareTraitTest
@@ -27,8 +28,8 @@ class AssertionAwareTraitTest extends AclManTestCase
 
     public function testRoleAwareTraitGetSet()
     {
-        $mock = $this->getMock('AclMan\Assertion\AssertionPluginManager');
-        $this->mockTrait->setPluginManager($mock);
-        $this->assertSame($mock, $this->mockTrait->getPluginManager());
+        $assertionManager = new AssertionManager();
+        $this->mockTrait->setPluginManager($assertionManager);
+        $this->assertSame($assertionManager, $this->mockTrait->getPluginManager());
     }
 }

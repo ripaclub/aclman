@@ -8,12 +8,12 @@
  */
 namespace AclManTest\Service;
 
-use AclMan\Permission\GenericPermission;
-use AclMan\Service\ServiceImplement;
+use AclMan\Service\Service;
 use AclManTest\AclManTestCase;
 use AclManTest\Assertion\TestAsset\Assertion\MockAssertion1;
 use AclManTest\Assertion\TestAsset\MockAssertionPluginManager;
 use Zend\Permissions\Acl\Acl;
+use Zend\Permissions\Acl\Assertion\AssertionManager;
 
 /**
  * Class ServiceAbstractTest
@@ -21,49 +21,15 @@ use Zend\Permissions\Acl\Acl;
 class ServiceAbstractTest extends AclManTestCase
 {
     /**
-     * @var $service ServiceImplement
+     * @var $service Service
      */
     protected $service;
 
     public function setUp()
     {
-        $this->service = new ServiceImplement();
+        $this->service = new Service();
 
         $this->service->setAcl(new Acl());
-    }
-
-    public function testServiceAbstractInit()
-    {
-        $mockStorage = $this->getMockBuilder('AclMan\Storage\Adapter\ArrayAdapter\ArrayAdapter')
-            ->disableOriginalConstructor()
-            ->getMock();
-
-        $mockStorage->expects($this->any())
-            ->method('getRoles')
-            ->will($this->returnValue([]));
-
-        $this->service->setStorage($mockStorage);
-        $this->service->init();
-
-        $this->assertEmpty($this->service->getRoles());
-
-        $mockStorage = $this->getMockBuilder('AclMan\Storage\Adapter\ArrayAdapter\ArrayAdapter')
-            ->disableOriginalConstructor()
-            ->getMock();
-
-        $mockStorage->expects($this->any())
-            ->method('getRoles')
-            ->will($this->returnValue(['test', 'test1']));
-
-        $this->service->setStorage($mockStorage);
-        $this->service->init();
-
-        $this->assertNotEmpty($this->service->getRoles());
-
-        $this->assertTrue($this->service->hasRole('test1'));
-        $this->assertInstanceOf('Zend\Permissions\Acl\Role\RoleInterface', $this->service->getRole('test1'));
-
-        $this->assertSame($this->service, $this->service->addRole('test2'));
     }
 
     public function testHasRole()
@@ -74,6 +40,21 @@ class ServiceAbstractTest extends AclManTestCase
     public function testAddRole()
     {
         $this->assertSame($this->service, $this->service->addRole('role1'));
+    }
+
+    /**
+     * @depends testAddRole
+     */
+    public function testGetRole()
+    {
+        $this->service->addRole('role1');
+        $this->assertInstanceOf('Zend\Permissions\Acl\Role\RoleInterface', $this->service->getRole('role1'));
+    }
+
+    public function testGetRoles()
+    {
+        $this->service->addRole('role1');
+        $this->assertCount(1, $this->service->getRoles());
     }
 
     public function testServiceAbstractAllowNotFoundResource()
@@ -212,7 +193,8 @@ class ServiceAbstractTest extends AclManTestCase
     {
         $this->service->addRole('role1');
 
-        $pluginManager = new MockAssertionPluginManager();
+        $pluginManager = new AssertionManager();
+
         $pluginManager->setService('testAssert', new MockAssertion1());
 
         $mockStorage = $this->getMockBuilder('AclMan\Storage\Adapter\ArrayAdapter\ArrayAdapter')

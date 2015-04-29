@@ -53,11 +53,11 @@ class GenericPermission implements PermissionInterface
     {
         if (isset($options['role'])) {
             $role = $this->checkRole($options['role']);
-            $this->roleId = $role->getRoleId();
+            $this->setRoleId($role);
         }
         if (isset($options['resource'])) {
             $resource = $this->checkResource($options['resource']);
-            $this->resourceId = $resource->getResourceId();
+            $this->setResourceId($resource);
         }
         if (isset($options['privilege'])) {
             $this->setPrivilege($options['privilege']);
@@ -71,19 +71,27 @@ class GenericPermission implements PermissionInterface
     }
 
     /**
-     * @param ResourceInterface $resource
+     * @param ResourceInterface|null $resource
+     * @return $this
      */
-    public function setResourceId(ResourceInterface $resource)
+    public function setResourceId(ResourceInterface $resource = null)
     {
-        $this->resourceId = $resource->getResourceId();
+        if ($resource) {
+            $this->resourceId = $resource->getResourceId();
+        }
+        return $this;
     }
 
     /**
-     * @param RoleInterface $role
+     * @param RoleInterface|null $role
+     * @return $this
      */
-    public function setRoleId(RoleInterface $role)
+    public function setRoleId(RoleInterface $role = null)
     {
-        $this->roleId = $role->getRoleId();
+        if ($role) {
+            $this->roleId = $role->getRoleId();
+        }
+        return $this;
     }
 
     /**
