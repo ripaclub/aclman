@@ -1,12 +1,9 @@
-ACL manager [![Latest Stable Version](https://poser.pugx.org/ripaclub/aclman/v/stable.png)](https://packagist.org/packages/ripaclub/aclman)
+ACL manager
 ============
 
-AclMan is a PHP library designed to manage access control list (ACL).
+> AclMan is a PHP library designed to manage access control list (ACL).
 
-| Branch  | Build Status | Coverage | Dependencies |
-|:-------------:|:-------------:|:-------------:|:-------------:|
-|master|[![Build Status](https://travis-ci.org/ripaclub/aclman.svg?branch=master)](https://travis-ci.org/ripaclub/aclman) |[![Coverage Status](https://coveralls.io/repos/ripaclub/aclman/badge.png?branch=master)](https://coveralls.io/r/ripaclub/aclman)|[![Dependency Status](https://www.versioneye.com/user/projects/544efbb39fc4d5226e0000ec/badge.svg)](https://www.versioneye.com/user/projects/544efbb39fc4d5226e0000ec)|
-|develop|[![Build Status](https://travis-ci.org/ripaclub/aclman.svg?branch=develop)](https://travis-ci.org/ripaclub/aclman)|[![Coverage Status](https://coveralls.io/repos/ripaclub/aclman/badge.png?branch=develop)](https://coveralls.io/r/ripaclub/aclman?branch=develop)|[![Dependency Status](https://www.versioneye.com/user/projects/544efb509fc4d5e91300017c/badge.svg)](https://www.versioneye.com/user/projects/544efb509fc4d5e91300017c)|
+[![Latest Stable Version](https://img.shields.io/packagist/v/ripaclub/aclman.svg?style=flat-square)](https://packagist.org/packages/ripaclub/aclman) [![Build Status](https://img.shields.io/travis/ripaclub/aclman/master.svg?style=flat-square)](https://travis-ci.org/ripaclub/aclman) [![Coverage Status](https://img.shields.io/coveralls/ripaclub/aclman/master.svg?style=flat-square)](https://coveralls.io/r/ripaclub/aclman)
 
 Requisites
 ----------
@@ -167,4 +164,4 @@ $aclService1->isAllowed('Role1', 'Resource2', 'view'); // FALSE
 
 ---
 
-[![Analytics](https://ga-beacon.appspot.com/UA-49655829-1/ripaclub/aclman)](https://github.com/igrigorik/ga-beacon)
+[![Analytics](https://ga-beacon.appspot.com/UA-49657176-3/aclman)](https://github.com/igrigorik/ga-beacon)
