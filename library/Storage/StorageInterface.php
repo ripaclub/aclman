@@ -24,7 +24,6 @@ interface StorageInterface
 
     const ALL_ROLES         = '';
     const ALL_RESOURCES     = '';
-    //const ALL_PRIVILEGES    = '#privileges#';
 
     /**
      * @param $role

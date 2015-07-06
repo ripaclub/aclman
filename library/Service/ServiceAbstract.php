@@ -85,7 +85,7 @@ class ServiceAbstract implements ServiceInterface
     {
         $role = ($role instanceof Role\RoleInterface) ? $role->getRoleId() : $role;
         $resource = ($resource instanceof Resource\ResourceInterface) ? $resource->getResourceId() : $resource;
-        // star recursion
+        // start recursion
         if (isset($this->loaded[(string)$role]) && isset($this->loaded[(string)$role][(string)$resource])) {
             return;
         }
@@ -115,7 +115,7 @@ class ServiceAbstract implements ServiceInterface
         }
 
         $permissions = $this->getStorage()->getPermissions($role, $resource);
-        //var_dump($permissions);
+
         if (count($permissions) > 0) {
             /* @var $permission GenericPermission */
             foreach ($permissions as $permission) {
