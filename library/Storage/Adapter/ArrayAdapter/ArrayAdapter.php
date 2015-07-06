@@ -77,7 +77,10 @@ class ArrayAdapter implements StorageInterface
                                         $this->addPermission($perm);
                                     }
                                 } else {
-                                    $permission = [];
+                                    if (!is_array($permission)) {
+                                        $permission = [];
+                                    }
+
                                     $permission['role'] = $role;
                                     $permission['resource'] = $resource;
                                     $this->addPermission($permission);

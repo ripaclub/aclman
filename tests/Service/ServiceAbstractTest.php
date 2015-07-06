@@ -309,4 +309,9 @@ class ServiceAbstractTest extends AclManTestCase
         $this->assertFalse($this->service->isAllowed('role2', 'resource1', 'view'));
         $this->assertTrue($this->service->isAllowed('role1', 'resource1', 'view'));
     }
+
+
+    /**
+     * @group tttt
+     */
 }

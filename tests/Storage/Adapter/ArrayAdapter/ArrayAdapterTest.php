@@ -603,26 +603,4 @@ class ArrayAdapterTest extends AclManTestCase
         $this->assertFalse($permission->isAllow());
         $this->assertNull($permission->getAssertion());
     }
-
-    /**
-     * @group tttt
-     */
-    public function testAllRolesAndAllResources()
-    {
-        $config = [
-            'roles' => [
-                StorageInterface::ALL_ROLES => [
-                    'resources' => [
-                        StorageInterface::ALL_RESOURCES => [
-                            'allow' => false,
-                        ],
-                    ],
-                ]
-            ]
-        ];
-
-        $storage = new ArrayAdapter($config);
-
-       var_dump($storage->getPermissions(StorageInterface::ALL_ROLES, 'test'));
-    }
 }

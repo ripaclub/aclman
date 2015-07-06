@@ -110,7 +110,6 @@ class ServiceAbstract implements ServiceInterface
         $permissions = $this->getStorage()
             ->getPermissions(StorageInterface::ALL_ROLES, StorageInterface::ALL_RESOURCES);
 
-
         if ($role && $resource) {
             $this->loadResource(null, $resource);
             $this->loadResource($role, null);

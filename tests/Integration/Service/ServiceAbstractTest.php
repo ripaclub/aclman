@@ -148,6 +148,19 @@ class ServiceAbstractTest extends AclManTestCase
                         ]
                     ]
                 ],
+                'AclStorage5' => [
+                    'roles' => [
+                        StorageInterface::ALL_ROLES => [
+                            'resources' => [
+                                StorageInterface::ALL_RESOURCES => [
+                                    [
+                                        'allow' => false,
+                                    ]
+                                ]
+                            ]
+                        ],
+                    ]
+                ],
             ],
             'aclman_services' => [
                 'AclService' => [
@@ -164,6 +177,10 @@ class ServiceAbstractTest extends AclManTestCase
                 ],
                 'AclService4' => [
                     'storage' => 'AclStorage4',
+                    'plugin_manager' => 'assertManager',
+                ],
+                'AclService5' => [
+                    'storage' => 'AclStorage5',
                     'plugin_manager' => 'assertManager',
                 ],
             ],
@@ -323,7 +340,7 @@ class ServiceAbstractTest extends AclManTestCase
         );
     }
 
-    public function _testOverrideIsAllowed()
+    public function testOverrideIsAllowed()
     {
         $acl = new Acl();
         $acl->addRole('role1');
@@ -351,5 +368,20 @@ class ServiceAbstractTest extends AclManTestCase
             $acl->isAllowed('role1', 'resource2', 'view'),
             $service->isAllowed('role1', 'resource2', 'view')
         );
+    }
+
+    /**
+     * @group oooo
+     */
+    public function testAllAll()
+    {
+
+        $service = $this->serviceManager->get('AclService5');
+
+
+        $this->assertFalse($service->isAllowed('role1', 'resource1', 'add'));
+       // $this->assertTrue($service->isAllowed('role1', 'resource2', 'add'));
+//        $this->assertTrue($service->isAllowed('role1', 'resource2', 'view'));
+
     }
 }
