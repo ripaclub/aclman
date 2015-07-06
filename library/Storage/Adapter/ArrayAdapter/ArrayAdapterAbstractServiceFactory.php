@@ -59,8 +59,8 @@ class ArrayAdapterAbstractServiceFactory implements AbstractFactoryInterface
      */
     public function createServiceWithName(ServiceLocatorInterface $serviceLocator, $name, $requestedName)
     {
-         $config = $this->getConfig($serviceLocator)[$requestedName];
-         return new ArrayAdapter($config);
+        $config = $this->getConfig($serviceLocator)[$requestedName];
+        return new ArrayAdapter($config);
     }
 
     /**

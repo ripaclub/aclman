@@ -77,6 +77,7 @@ class ArrayAdapter implements StorageInterface
                                         $this->addPermission($perm);
                                     }
                                 } else {
+                                    $permission = [];
                                     $permission['role'] = $role;
                                     $permission['resource'] = $resource;
                                     $this->addPermission($permission);
@@ -290,24 +291,21 @@ class ArrayAdapter implements StorageInterface
         $result = [];
         if ($resource) {
             $resource = $this->checkResource($resource);
-            if(isset($this->permission[$role->getRoleId()][self::NODE_RESOURCES][$resource->getResourceId()][self::NODE_PERMISSION])) {
+            if (isset($this->permission[$role->getRoleId()][self::NODE_RESOURCES][$resource->getResourceId()][self::NODE_PERMISSION])) {
                 $listPermission = $this->permission[$role->getRoleId()][self::NODE_RESOURCES][$resource->getResourceId()][self::NODE_PERMISSION];
                 foreach ($listPermission as $permission) {
-
                     $permission['role'] = ($role->getRoleId() == StorageInterface::ALL_ROLES) ? null : $role->getRoleId();
                     $permission['resource'] = ($resource->getResourceId() == StorageInterface::ALL_RESOURCES) ? null : $resource->getResourceId();
 
                     $obj = new GenericPermission($permission);
                     array_push($result, $obj);
                 }
-
             }
         } else {
-            if(isset($this->permission[$role->getRoleId()][self::NODE_RESOURCES])) {
+            if (isset($this->permission[$role->getRoleId()][self::NODE_RESOURCES])) {
                 $listResource = $this->permission[$role->getRoleId()][self::NODE_RESOURCES];
                 foreach ($listResource as $keyResource => $listPermission) {
                     foreach ($listPermission[self::NODE_PERMISSION] as $permission) {
-
                         $permission['role'] = ($role->getRoleId() == StorageInterface::ALL_ROLES) ? null : $role->getRoleId();
                         $permission['resource'] = ($keyResource == StorageInterface::ALL_RESOURCES) ? null : $keyResource;
 
@@ -321,7 +319,7 @@ class ArrayAdapter implements StorageInterface
     }
 
     /**
-     * @param PermissionInterface $permission
+     * @param PermissionInterface|array $permission
      * @return $this|bool
      */
     public function addPermission($permission)

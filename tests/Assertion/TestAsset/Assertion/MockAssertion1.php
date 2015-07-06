@@ -26,5 +26,4 @@ class MockAssertion1 implements AssertionInterface, ServiceLocatorAwareInterface
     {
         // TODO: implement assert() method.
     }
-
 }

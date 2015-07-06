@@ -8,6 +8,7 @@
  */
 namespace AclManTest\Storage;
 
+use AclMan\Storage\StorageInterface;
 use AclManTest\AclManTestCase;
 use Zend\Mvc\Service\ServiceManagerConfig;
 use Zend\ServiceManager;
@@ -50,7 +51,18 @@ class StorageFactoryTest extends AclManTestCase
                             ]
                         ]
                     ]
-                ]
+                ],
+                'AclStorage2' => [
+                    'roles' => [
+                        StorageInterface::ALL_ROLES => [
+                            'resources' => [
+                                StorageInterface::ALL_RESOURCES => [
+                                    'allow' => true,
+                                ],
+                            ],
+                        ],
+                    ]
+                ],
             ],
 
         ];
@@ -70,6 +82,7 @@ class StorageFactoryTest extends AclManTestCase
         $serviceLocator = $this->serviceManager;
         $this->assertTrue($serviceLocator->has('AclStorage'));
         $this->assertTrue($serviceLocator->has('AclStorage1'));
+        $this->assertTrue($serviceLocator->has('AclStorage2'));
     }
 
     public function testGetService()
@@ -77,6 +90,7 @@ class StorageFactoryTest extends AclManTestCase
         $serviceLocator = $this->serviceManager;
         $this->assertInstanceOf('AclMan\Storage\StorageInterface', $serviceLocator->get('AclStorage'));
         $this->assertInstanceOf('AclMan\Storage\StorageInterface', $serviceLocator->get('AclStorage1'));
+        $this->assertInstanceOf('AclMan\Storage\StorageInterface', $serviceLocator->get('AclStorage2'));
     }
 
     public function testHasServiceWithoutConfig()

@@ -77,5 +77,4 @@ class AssertionManagerFactoryTest extends AclManTestCase
             $pluginManager->get('assert')
         );
     }
-
 }

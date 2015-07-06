@@ -25,7 +25,6 @@ class ArrayAdapterAbstractServiceFactoryTest extends AclManTestCase
 
     public function setUp()
     {
-
         $config = [
             'aclManArrayAdapterStorage' => [
                 'ArrayStorage' => [

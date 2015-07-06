@@ -97,5 +97,4 @@ class MockAdapter implements StorageInterface
     {
         // TODO: implement addPermission() method.
     }
-
 }

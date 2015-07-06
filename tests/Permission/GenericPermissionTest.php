@@ -54,7 +54,6 @@ class GenericPermissionTest extends AclManTestCase
         $this->assertFalse($this->permission->isAllow());
         $this->assertSame('test', $this->permission->getAssertion());
         $this->assertSame('add', $this->permission->getPrivilege());
-
     }
 
     public function testSetterRoleResource()

@@ -87,9 +87,8 @@ class ServiceAbstract implements ServiceInterface
         $resource = ($resource instanceof Resource\ResourceInterface) ? $resource->getResourceId() : $resource;
         // start recursion
         if (isset($this->loaded[(string)$role]) && isset($this->loaded[(string)$role][(string)$resource])) {
-            return;
+            return; // FIXME? return false
         }
-
 
         if (!isset($this->loaded[(string)$role])) {
             $this->loaded[(string)$role] = [];

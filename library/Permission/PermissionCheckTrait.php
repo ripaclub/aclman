@@ -16,7 +16,7 @@ use AclMan\Exception\InvalidParameterException;
 trait PermissionCheckTrait
 {
     /**
-     * @param $permission
+     * @param PermissionInterface|array $permission
      * @return GenericPermission
      * @throws InvalidParameterException
      */
