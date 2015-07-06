@@ -9,6 +9,7 @@
 namespace AclManTest\Storage\Adapter\ArrayAdapter;
 
 use AclMan\Storage\Adapter\ArrayAdapter\ArrayAdapter;
+use AclMan\Storage\StorageInterface;
 use AclManTest\AclManTestCase;
 
 /**
@@ -567,7 +568,7 @@ class ArrayAdapterTest extends AclManTestCase
         $this->assertTrue($adapter->hasResource('resource1'));
         $this->assertTrue($adapter->hasResource('resource2'));
 
-        $role1Privileges =  $adapter->getPermissions('role1');
+        $role1Privileges = $adapter->getPermissions('role1');
 
         $this->assertCount(2, $role1Privileges);
 
@@ -585,7 +586,7 @@ class ArrayAdapterTest extends AclManTestCase
         $this->assertTrue($permission->isAllow());
         $this->assertNull($permission->getAssertion());
 
-        $role2Privileges =  $adapter->getPermissions('role2');
+        $role2Privileges = $adapter->getPermissions('role2');
         $this->assertCount(2, $role2Privileges);
 
         $permission = $role2Privileges[0];
@@ -601,5 +602,27 @@ class ArrayAdapterTest extends AclManTestCase
         $this->assertSame($permission->getPrivilege(), 'add');
         $this->assertFalse($permission->isAllow());
         $this->assertNull($permission->getAssertion());
+    }
+
+    /**
+     * @group tttt
+     */
+    public function testAllRolesAndAllResources()
+    {
+        $config = [
+            'roles' => [
+                StorageInterface::ALL_ROLES => [
+                    'resources' => [
+                        StorageInterface::ALL_RESOURCES => [
+                            'allow' => false,
+                        ],
+                    ],
+                ]
+            ]
+        ];
+
+        $storage = new ArrayAdapter($config);
+
+       var_dump($storage->getPermissions(StorageInterface::ALL_ROLES, 'test'));
     }
 }

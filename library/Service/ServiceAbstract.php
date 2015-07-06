@@ -14,8 +14,10 @@ use AclMan\Permission\GenericPermission;
 use AclMan\Resource\ResourceCheckTrait;
 use AclMan\Role\RoleCheckTrait;
 use AclMan\Storage\StorageAwareTrait;
+use AclMan\Storage\StorageInterface;
 use Zend\Permissions\Acl\Resource;
 use Zend\Permissions\Acl\Role;
+use Zend\Stdlib\ArrayUtils;
 
 /**
  * Class ServiceAbstract
@@ -95,9 +97,19 @@ class ServiceAbstract implements ServiceInterface
         }
         $this->loaded[(string)$role][(string)$resource] = true;
 
+        if (empty($role) || empty($resource)) {
+
+        }
+
+        /*
         if ($role || $resource) {
             $this->loadResource();
         }
+        */
+
+        $permissions = $this->getStorage()
+            ->getPermissions(StorageInterface::ALL_ROLES, StorageInterface::ALL_RESOURCES);
+
 
         if ($role && $resource) {
             $this->loadResource(null, $resource);
@@ -113,7 +125,11 @@ class ServiceAbstract implements ServiceInterface
             $this->getAcl()->addResource($resource);
         }
 
-        $permissions = $this->getStorage()->getPermissions($role, $resource);
+        if ($permissions) {
+            ArrayUtils::merge($permissions, $this->getStorage()->getPermissions($role, $resource));
+        } else {
+            $permissions = $this->getStorage()->getPermissions($role, $resource);
+        }
 
         if (count($permissions) > 0) {
             /* @var $permission GenericPermission */
