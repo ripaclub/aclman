@@ -89,7 +89,7 @@ class ServiceAbstract implements ServiceInterface
         $resource = ($resource instanceof Resource\ResourceInterface) ? $resource->getResourceId() : $resource;
         // start recursion
         if (isset($this->loaded[(string)$role]) && isset($this->loaded[(string)$role][(string)$resource])) {
-            return; // FIXME? return false
+            return true;
         }
 
         if (!isset($this->loaded[(string)$role])) {
@@ -97,19 +97,8 @@ class ServiceAbstract implements ServiceInterface
         }
         $this->loaded[(string)$role][(string)$resource] = true;
 
-        if (empty($role) || empty($resource)) {
-
-        }
-
-        /*
-        if ($role || $resource) {
-            $this->loadResource();
-        }
-        */
-
-        $permissions = $this->getStorage()
-            ->getPermissions(StorageInterface::ALL_ROLES, StorageInterface::ALL_RESOURCES);
-
+        // ensures loading for ALL_ROLES and ALL_RESOURCES
+        $this->loadResource();
         if ($role && $resource) {
             $this->loadResource(null, $resource);
             $this->loadResource($role, null);
@@ -124,12 +113,7 @@ class ServiceAbstract implements ServiceInterface
             $this->getAcl()->addResource($resource);
         }
 
-        if ($permissions) {
-            ArrayUtils::merge($permissions, $this->getStorage()->getPermissions($role, $resource));
-        } else {
-            $permissions = $this->getStorage()->getPermissions($role, $resource);
-        }
-
+        $permissions = $this->getStorage()->getPermissions($role, $resource);
         if (count($permissions) > 0) {
             /* @var $permission GenericPermission */
             foreach ($permissions as $permission) {

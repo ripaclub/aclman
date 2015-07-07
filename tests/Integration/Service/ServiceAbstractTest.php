@@ -148,13 +148,30 @@ class ServiceAbstractTest extends AclManTestCase
                         ]
                     ]
                 ],
-                'AclStorage5' => [
+                'AclStorageAllRolesAllResources' => [
                     'roles' => [
                         StorageInterface::ALL_ROLES => [
                             'resources' => [
                                 StorageInterface::ALL_RESOURCES => [
                                     [
-                                        'allow' => false,
+                                        'allow' => true,
+                                    ]
+                                ]
+                            ]
+                        ],
+                    ]
+                ],
+
+                'AclStorageAllRolesAllResourcesWithPrivilege' => [
+                    'roles' => [
+                        StorageInterface::ALL_ROLES => [
+                            'resources' => [
+                                StorageInterface::ALL_RESOURCES => [
+                                    [
+                                        'allow' => true,
+                                        'privileges' => [
+                                            'view'
+                                        ]
                                     ]
                                 ]
                             ]
@@ -179,8 +196,12 @@ class ServiceAbstractTest extends AclManTestCase
                     'storage' => 'AclStorage4',
                     'plugin_manager' => 'assertManager',
                 ],
-                'AclService5' => [
-                    'storage' => 'AclStorage5',
+                'AclServiceAllRolesAllResources' => [
+                    'storage' => 'AclStorageAllRolesAllResources',
+                    'plugin_manager' => 'assertManager',
+                ],
+                'AclServiceAllRolesAllResourcesWithPrivilege' => [
+                    'storage' => 'AclStorageAllRolesAllResourcesWithPrivilege',
                     'plugin_manager' => 'assertManager',
                 ],
             ],
@@ -373,15 +394,30 @@ class ServiceAbstractTest extends AclManTestCase
     /**
      * @group oooo
      */
-    public function testAllAll()
+    public function testAllRolesAllResources()
     {
 
-        $service = $this->serviceManager->get('AclService5');
+        $service = $this->serviceManager->get('AclServiceAllRolesAllResources');
 
 
-        $this->assertFalse($service->isAllowed('role1', 'resource1', 'add'));
-       // $this->assertTrue($service->isAllowed('role1', 'resource2', 'add'));
-//        $this->assertTrue($service->isAllowed('role1', 'resource2', 'view'));
+        $this->assertTrue($service->isAllowed('role1', 'resource1', 'add'));
+        $this->assertTrue($service->isAllowed(null, 'resource1', 'add'));
+        $this->assertTrue($service->isAllowed('role1', null, 'add'));
+        $this->assertTrue($service->isAllowed('role1', 'resource1', null));
+        $this->assertTrue($service->isAllowed(null, null, 'add'));
+        $this->assertTrue($service->isAllowed('role1', null, null));
+        $this->assertTrue($service->isAllowed(null, null, null));
 
+
+
+        $service = $this->serviceManager->get('AclServiceAllRolesAllResourcesWithPrivilege');
+
+        $this->assertTrue($service->isAllowed('role1', 'resource1', 'view'));
+        $this->assertTrue($service->isAllowed(null, 'resource1', 'view'));
+        $this->assertTrue($service->isAllowed('role1', null, 'view'));
+        $this->assertFalse($service->isAllowed('role1', 'resource1', null));
+        $this->assertTrue($service->isAllowed(null, null, 'view'));
+        $this->assertFalse($service->isAllowed('role1', null, null));
+        $this->assertFalse($service->isAllowed(null, null, null));
     }
 }
