@@ -3,7 +3,7 @@
  * ACL Manager
  *
  * @link        https://github.com/ripaclub/aclman
- * @copyright   Copyright (c) 2014, RipaClub
+ * @copyright   Copyright (c) 2015, RipaClub
  * @license     http://opensource.org/licenses/BSD-2-Clause Simplified BSD License
  */
 namespace AclManTest\Integration\Service;
@@ -11,11 +11,10 @@ namespace AclManTest\Integration\Service;
 use AclMan\Service\Service;
 use AclMan\Storage\StorageInterface;
 use AclManTest\AclManTestCase;
-use AclMan\Storage\Adapter\ArrayAdapter\ArrayAdapter;
 use AclManTest\Integration\Service\TestAsset\Assertion\Assertion1;
 use AclManTest\Integration\Service\TestAsset\Assertion\Assertion2;
-use Zend\Permissions\Acl\Acl;
 use Zend\Mvc\Service\ServiceManagerConfig;
+use Zend\Permissions\Acl\Acl;
 use Zend\Permissions\Acl\Assertion\AssertionManager;
 use Zend\ServiceManager;
 
@@ -276,7 +275,7 @@ class ServiceAbstractTest extends AclManTestCase
         );
     }
 
-    public function _testAllRolesIsAllowed()
+    public function testAllRolesIsAllowed()
     {
         $acl = new Acl();
         $acl->addRole('role1');
@@ -391,12 +390,8 @@ class ServiceAbstractTest extends AclManTestCase
         );
     }
 
-    /**
-     * @group oooo
-     */
     public function testAllRolesAllResources()
     {
-
         $service = $this->serviceManager->get('AclServiceAllRolesAllResources');
 
 

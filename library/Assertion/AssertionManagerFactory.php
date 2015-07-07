@@ -3,13 +3,12 @@
  * ACL Manager
  *
  * @link        https://github.com/ripaclub/aclman
- * @copyright   Copyright (c) 2014, RipaClub
+ * @copyright   Copyright (c) 2015, RipaClub
  * @license     http://opensource.org/licenses/BSD-2-Clause Simplified BSD License
  */
 namespace AclMan\Assertion;
 
 use Zend\Permissions\Acl\Assertion\AssertionManager;
-use Zend\ServiceManager\AbstractPluginManager;
 use Zend\ServiceManager\Config;
 use Zend\ServiceManager\FactoryInterface;
 use Zend\ServiceManager\ServiceLocatorInterface;
@@ -35,7 +34,9 @@ class AssertionManagerFactory implements FactoryInterface
     public function createService(ServiceLocatorInterface $serviceLocator)
     {
         $config = $serviceLocator->get('Config');
-        $configManager = (isset($config['aclman-assertion-manager'])) ? new Config($config['aclman-assertion-manager']) : null;
+        $configManager = (isset($config['aclman-assertion-manager'])) ? new Config(
+            $config['aclman-assertion-manager']
+        ) : null;
         return new AssertionManager($configManager);
     }
 }

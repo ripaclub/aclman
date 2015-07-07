@@ -3,13 +3,12 @@
  * ACL Manager
  *
  * @link        https://github.com/ripaclub/aclman
- * @copyright   Copyright (c) 2014, RipaClub
+ * @copyright   Copyright (c) 2015, RipaClub
  * @license     http://opensource.org/licenses/BSD-2-Clause Simplified BSD License
  */
 namespace AclManTest\Storage\Adapter\ArrayAdapter;
 
 use AclMan\Storage\Adapter\ArrayAdapter\ArrayAdapter;
-use AclMan\Storage\StorageInterface;
 use AclManTest\AclManTestCase;
 
 /**
@@ -471,7 +470,7 @@ class ArrayAdapterTest extends AclManTestCase
     /**
      * @depends testAddPermission
      */
-    public function testGetPermission()
+    public function testGetPermissions()
     {
         $this->adapter->addRoles(['role1']);
         $this->assertCount(0, $this->adapter->getPermissions('role1'));

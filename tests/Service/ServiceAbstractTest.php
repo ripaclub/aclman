@@ -3,7 +3,7 @@
  * ACL Manager
  *
  * @link        https://github.com/ripaclub/aclman
- * @copyright   Copyright (c) 2014, RipaClub
+ * @copyright   Copyright (c) 2015, RipaClub
  * @license     http://opensource.org/licenses/BSD-2-Clause Simplified BSD License
  */
 namespace AclManTest\Service;
@@ -11,7 +11,6 @@ namespace AclManTest\Service;
 use AclMan\Service\Service;
 use AclManTest\AclManTestCase;
 use AclManTest\Assertion\TestAsset\Assertion\MockAssertion1;
-use AclManTest\Assertion\TestAsset\MockAssertionPluginManager;
 use Zend\Permissions\Acl\Acl;
 use Zend\Permissions\Acl\Assertion\AssertionManager;
 
@@ -309,9 +308,4 @@ class ServiceAbstractTest extends AclManTestCase
         $this->assertFalse($this->service->isAllowed('role2', 'resource1', 'view'));
         $this->assertTrue($this->service->isAllowed('role1', 'resource1', 'view'));
     }
-
-
-    /**
-     * @group tttt
-     */
 }
