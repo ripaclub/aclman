@@ -320,7 +320,6 @@ class ArrayAdapter implements StorageInterface
             if (isset($this->permission[$role->getRoleId()][self::NODE_RESOURCES])) {
                 $listResource = $this->permission[$role->getRoleId()][self::NODE_RESOURCES];
                 foreach ($listResource as $keyResource => $listPermission) {
-
                     foreach ($listPermission[self::NODE_PERMISSION] as $permission) {
                         $permission['role'] = ($role->getRoleId() == StorageInterface::ALL_ROLES) ?
                             null :
