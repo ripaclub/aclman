@@ -3,7 +3,7 @@
  * ACL Manager
  *
  * @link        https://github.com/ripaclub/aclman
- * @copyright   Copyright (c) 2014, RipaClub
+ * @copyright   Copyright (c) 2015, RipaClub
  * @license     http://opensource.org/licenses/BSD-2-Clause Simplified BSD License
  */
 namespace AclManTest\Integration\Service;
@@ -11,18 +11,17 @@ namespace AclManTest\Integration\Service;
 use AclMan\Service\Service;
 use AclMan\Storage\StorageInterface;
 use AclManTest\AclManTestCase;
-use AclMan\Storage\Adapter\ArrayAdapter\ArrayAdapter;
 use AclManTest\Integration\Service\TestAsset\Assertion\Assertion1;
 use AclManTest\Integration\Service\TestAsset\Assertion\Assertion2;
-use Zend\Permissions\Acl\Acl;
 use Zend\Mvc\Service\ServiceManagerConfig;
+use Zend\Permissions\Acl\Acl;
 use Zend\Permissions\Acl\Assertion\AssertionManager;
 use Zend\ServiceManager;
 
 /**
  * Class ServiceAbstractTest
  *
- * @grop integration
+ * @group integration
  */
 class ServiceAbstractTest extends AclManTestCase
 {
@@ -56,8 +55,14 @@ class ServiceAbstractTest extends AclManTestCase
                                             'view'
                                         ]
                                     ]
-                                ]
-                            ]
+                                ],
+                                'resource3' => [
+                                    [
+                                        'allow' => true,
+                                        'privileges' => ['PUT']
+                                    ]
+                                ],
+                            ],
                         ],
                         'role2' => [
                             'parents' => [
@@ -148,6 +153,36 @@ class ServiceAbstractTest extends AclManTestCase
                         ]
                     ]
                 ],
+                'AclStorageAllRolesAllResources' => [
+                    'roles' => [
+                        StorageInterface::ALL_ROLES => [
+                            'resources' => [
+                                StorageInterface::ALL_RESOURCES => [
+                                    [
+                                        'allow' => true,
+                                    ]
+                                ]
+                            ]
+                        ],
+                    ]
+                ],
+
+                'AclStorageAllRolesAllResourcesWithPrivilege' => [
+                    'roles' => [
+                        StorageInterface::ALL_ROLES => [
+                            'resources' => [
+                                StorageInterface::ALL_RESOURCES => [
+                                    [
+                                        'allow' => true,
+                                        'privileges' => [
+                                            'view'
+                                        ]
+                                    ]
+                                ]
+                            ]
+                        ],
+                    ]
+                ],
             ],
             'aclman_services' => [
                 'AclService' => [
@@ -164,6 +199,14 @@ class ServiceAbstractTest extends AclManTestCase
                 ],
                 'AclService4' => [
                     'storage' => 'AclStorage4',
+                    'plugin_manager' => 'assertManager',
+                ],
+                'AclServiceAllRolesAllResources' => [
+                    'storage' => 'AclStorageAllRolesAllResources',
+                    'plugin_manager' => 'assertManager',
+                ],
+                'AclServiceAllRolesAllResourcesWithPrivilege' => [
+                    'storage' => 'AclStorageAllRolesAllResourcesWithPrivilege',
                     'plugin_manager' => 'assertManager',
                 ],
             ],
@@ -197,24 +240,26 @@ class ServiceAbstractTest extends AclManTestCase
     }
 
 
-    public function _testHasService()
+    public function testHasService()
     {
         $this->assertTrue($this->serviceManager->has('AclService'));
     }
 
-    public function _testIsAllowed()
+    public function testIsAllowed()
     {
-        $acl = new Acl();
+        $acl = new Acl;
         $acl->addRole('role1');
         $acl->addResource('resource1');
         $acl->allow('role1', 'resource1', 'view');
         $acl->addResource('resource2');
-        $acl->allow('role1', 'resource2', 'view', new Assertion1());
+        $acl->addResource('resource3');
+        $acl->allow('role1', 'resource2', 'view', new Assertion1);
+        $acl->allow('role1', 'resource3', 'PUT');
         $acl->addRole('role2', ['role1']);
         $acl->allow('role2', 'resource1', 'add');
         $acl->deny('role2', 'resource1', 'view');
         $acl->allow('role2', 'resource2', 'add');
-        $acl->allow('role2', 'resource2', 'view', new Assertion2());
+        $acl->allow('role2', 'resource2', 'view', new Assertion2);
 
         /** @var $service Service */
         $service = $this->serviceManager->get('AclService');
@@ -236,11 +281,15 @@ class ServiceAbstractTest extends AclManTestCase
             $acl->isAllowed('role2', 'resource1', 'add'),
             $service->isAllowed('role2', 'resource1', 'add')
         );
+        $this->assertSame(
+            $acl->isAllowed('role2', 'resource3', 'PUT'),
+            $service->isAllowed('role2', 'resource3', 'PUT')
+        );
     }
 
-    public function _testAllRolesIsAllowed()
+    public function testAllRolesAreAllowed()
     {
-        $acl = new Acl();
+        $acl = new Acl;
         $acl->addRole('role1');
         $acl->addRole('role2');
         $acl->addRole('role3');
@@ -323,7 +372,7 @@ class ServiceAbstractTest extends AclManTestCase
         );
     }
 
-    public function _testOverrideIsAllowed()
+    public function testOverrideIsAllowed()
     {
         $acl = new Acl();
         $acl->addRole('role1');
@@ -351,5 +400,31 @@ class ServiceAbstractTest extends AclManTestCase
             $acl->isAllowed('role1', 'resource2', 'view'),
             $service->isAllowed('role1', 'resource2', 'view')
         );
+    }
+
+    public function testAllRolesAllResources()
+    {
+        $service = $this->serviceManager->get('AclServiceAllRolesAllResources');
+
+
+        $this->assertTrue($service->isAllowed('role1', 'resource1', 'add'));
+        $this->assertTrue($service->isAllowed(null, 'resource1', 'add'));
+        $this->assertTrue($service->isAllowed('role1', null, 'add'));
+        $this->assertTrue($service->isAllowed('role1', 'resource1', null));
+        $this->assertTrue($service->isAllowed(null, null, 'add'));
+        $this->assertTrue($service->isAllowed('role1', null, null));
+        $this->assertTrue($service->isAllowed(null, null, null));
+
+
+
+        $service = $this->serviceManager->get('AclServiceAllRolesAllResourcesWithPrivilege');
+
+        $this->assertTrue($service->isAllowed('role1', 'resource1', 'view'));
+        $this->assertTrue($service->isAllowed(null, 'resource1', 'view'));
+        $this->assertTrue($service->isAllowed('role1', null, 'view'));
+        $this->assertFalse($service->isAllowed('role1', 'resource1', null));
+        $this->assertTrue($service->isAllowed(null, null, 'view'));
+        $this->assertFalse($service->isAllowed('role1', null, null));
+        $this->assertFalse($service->isAllowed(null, null, null));
     }
 }

@@ -3,7 +3,7 @@
  * ACL Manager
  *
  * @link        https://github.com/ripaclub/aclman
- * @copyright   Copyright (c) 2014, RipaClub
+ * @copyright   Copyright (c) 2015, RipaClub
  * @license     http://opensource.org/licenses/BSD-2-Clause Simplified BSD License
  */
 namespace AclMan\Storage;
@@ -24,17 +24,16 @@ interface StorageInterface
 
     const ALL_ROLES         = '';
     const ALL_RESOURCES     = '';
-    //const ALL_PRIVILEGES    = '#privileges#';
 
     /**
-     * @param $role
+     * @param string|RoleInterface $role
      * @param array $parents
      * @return bool
      */
     public function addParentRoles($role, array $parents);
 
     /**
-     * @param $role
+     * @param string|RoleInterface $role
      * @return array
      */
     public function getParentRoles($role);
@@ -45,14 +44,14 @@ interface StorageInterface
     public function getRoles();
 
     /**
-     * @param RoleInterface|string $role
+     * @param string|RoleInterface $role
      * @param array $parents
      * @return $this
      */
     public function addRole($role, array $parents = []);
 
     /**
-     * @param RoleInterface|string $role
+     * @param string|RoleInterface $role
      * @return bool
      */
     public function hasRole($role);
@@ -63,20 +62,20 @@ interface StorageInterface
     public function getResources();
 
     /**
-     * @param ResourceInterface|string $resource
+     * @param string|RoleInterface $resource
      * @return bool
      */
     public function addResource($resource);
 
     /**
-     * @param ResourceInterface|string $resource
+     * @param string|RoleInterface $resource
      * @return bool
      */
     public function hasResource($resource);
 
     /**
-     * @param null $role
-     * @param null $resource
+     * @param null|string|RoleInterface $role
+     * @param null|string|ResourceInterface $resource
      * @return array
      */
     public function getPermissions($role = null, $resource = null);

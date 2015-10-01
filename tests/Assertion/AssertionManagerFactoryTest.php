@@ -3,13 +3,12 @@
  * ACL Manager
  *
  * @link        https://github.com/ripaclub/aclman
- * @copyright   Copyright (c) 2014, RipaClub
+ * @copyright   Copyright (c) 2015, RipaClub
  * @license     http://opensource.org/licenses/BSD-2-Clause Simplified BSD License
  */
 namespace AclManTest\Assertion;
 
 use AclManTest\AclManTestCase;
-use AclManTest\Assertion\TestAsset\MockAssertionPluginManager;
 use Zend\Mvc\Service\ServiceManagerConfig;
 use Zend\Permissions\Acl\Assertion\AssertionManager;
 use Zend\ServiceManager;
@@ -52,7 +51,8 @@ class AssertionManagerFactoryTest extends AclManTestCase
                 'assertManager' => 'AclMan\Assertion\AssertionManagerFactory',
             ],
             'aclman-assertion-manager' => [
-                'AclManTest\Assertion\TestAsset\Assertion\MockAssertion1' => 'AclManTest\Assertion\TestAsset\Assertion\MockAssertion1',
+                'AclManTest\Assertion\TestAsset\Assertion\MockAssertion1' =>
+                    'AclManTest\Assertion\TestAsset\Assertion\MockAssertion1',
                 'invokables' => [
                     'assert' => 'AclManTest\Assertion\TestAsset\Assertion\MockAssertion1',
                 ]
@@ -77,5 +77,4 @@ class AssertionManagerFactoryTest extends AclManTestCase
             $pluginManager->get('assert')
         );
     }
-
 }

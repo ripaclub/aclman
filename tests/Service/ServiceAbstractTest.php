@@ -3,7 +3,7 @@
  * ACL Manager
  *
  * @link        https://github.com/ripaclub/aclman
- * @copyright   Copyright (c) 2014, RipaClub
+ * @copyright   Copyright (c) 2015, RipaClub
  * @license     http://opensource.org/licenses/BSD-2-Clause Simplified BSD License
  */
 namespace AclManTest\Service;
@@ -11,7 +11,6 @@ namespace AclManTest\Service;
 use AclMan\Service\Service;
 use AclManTest\AclManTestCase;
 use AclManTest\Assertion\TestAsset\Assertion\MockAssertion1;
-use AclManTest\Assertion\TestAsset\MockAssertionPluginManager;
 use Zend\Permissions\Acl\Acl;
 use Zend\Permissions\Acl\Assertion\AssertionManager;
 
@@ -27,9 +26,8 @@ class ServiceAbstractTest extends AclManTestCase
 
     public function setUp()
     {
-        $this->service = new Service();
-
-        $this->service->setAcl(new Acl());
+        $this->service = new Service;
+        $this->service->setAcl(new Acl);
     }
 
     public function testHasRole()
@@ -40,6 +38,12 @@ class ServiceAbstractTest extends AclManTestCase
     public function testAddRole()
     {
         $this->assertSame($this->service, $this->service->addRole('role1'));
+    }
+
+    public function testAddRoleWithParent()
+    {
+        $this->service->addRole('role1');
+        $this->assertSame($this->service, $this->service->addRole('role2', 'role1'));
     }
 
     /**
@@ -70,7 +74,7 @@ class ServiceAbstractTest extends AclManTestCase
     {
         $mockStorage = $this->getMockBuilder('AclMan\Storage\Adapter\ArrayAdapter\ArrayAdapter')
             ->disableOriginalConstructor()
-            ->setMethods(['hasResource', 'getPermissions'])
+            ->setMethods(['hasResource', 'getPermissions', 'getParentRoles'])
             ->getMock();
 
         $mockStorage->expects($this->any())
@@ -95,7 +99,7 @@ class ServiceAbstractTest extends AclManTestCase
 
         $mockStorage = $this->getMockBuilder('AclMan\Storage\Adapter\ArrayAdapter\ArrayAdapter')
             ->disableOriginalConstructor()
-            ->setMethods(['hasResource', 'getPermissions', 'hasRole'])
+            ->setMethods(['hasResource', 'getPermissions', 'hasRole', 'getParentRoles'])
             ->getMock();
 
         $mockStorage->expects($this->any())
@@ -145,7 +149,7 @@ class ServiceAbstractTest extends AclManTestCase
 
         $mockStorage = $this->getMockBuilder('AclMan\Storage\Adapter\ArrayAdapter\ArrayAdapter')
             ->disableOriginalConstructor()
-            ->setMethods(['hasResource', 'getPermissions', 'hasRole'])
+            ->setMethods(['hasResource', 'getPermissions', 'hasRole', 'getParentRoles'])
             ->getMock();
 
         $mockStorage->expects($this->any())
@@ -199,7 +203,7 @@ class ServiceAbstractTest extends AclManTestCase
 
         $mockStorage = $this->getMockBuilder('AclMan\Storage\Adapter\ArrayAdapter\ArrayAdapter')
             ->disableOriginalConstructor()
-            ->setMethods(['hasResource', 'getPermissions', 'hasRole'])
+            ->setMethods(['hasResource', 'getPermissions', 'hasRole', 'getParentRoles'])
             ->getMock();
 
         $mockStorage->expects($this->any())
@@ -258,16 +262,20 @@ class ServiceAbstractTest extends AclManTestCase
     public function testIsAllowed()
     {
         $this->service->addRole('role1');
-        $this->service->addRole('role2');
+        $this->service->addRole('role2', 'role1');
 
         $mockStorage = $this->getMockBuilder('AclMan\Storage\Adapter\ArrayAdapter\ArrayAdapter')
             ->disableOriginalConstructor()
-            ->setMethods(['hasResource', 'getPermissions', 'hasRole'])
+            ->setMethods(['hasResource', 'getPermissions', 'hasRole', 'getParentRoles'])
             ->getMock();
 
         $mockStorage->expects($this->any())
             ->method('hasResource')
             ->will($this->returnValue(true));
+
+        $mockStorage->expects($this->any())
+            ->method('getParentRoles')
+            ->will($this->returnValue(['role1']));
 
         $permission = $this->getMockBuilder('AclMan\Permission\GenericPermission')
             ->disableOriginalConstructor()
@@ -306,7 +314,7 @@ class ServiceAbstractTest extends AclManTestCase
 
         $this->service->setStorage($mockStorage);
 
-        $this->assertFalse($this->service->isAllowed('role2', 'resource1', 'view'));
+        $this->assertTrue($this->service->isAllowed('role2', 'resource1', 'view'));
         $this->assertTrue($this->service->isAllowed('role1', 'resource1', 'view'));
     }
 }

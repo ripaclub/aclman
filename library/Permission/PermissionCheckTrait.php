@@ -3,7 +3,7 @@
  * ACL Manager
  *
  * @link        https://github.com/ripaclub/aclman
- * @copyright   Copyright (c) 2014, RipaClub
+ * @copyright   Copyright (c) 2015, RipaClub
  * @license     http://opensource.org/licenses/BSD-2-Clause Simplified BSD License
  */
 namespace AclMan\Permission;
@@ -16,7 +16,7 @@ use AclMan\Exception\InvalidParameterException;
 trait PermissionCheckTrait
 {
     /**
-     * @param $permission
+     * @param PermissionInterface|array $permission
      * @return GenericPermission
      * @throws InvalidParameterException
      */

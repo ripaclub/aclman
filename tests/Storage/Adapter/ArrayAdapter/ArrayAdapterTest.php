@@ -3,7 +3,7 @@
  * ACL Manager
  *
  * @link        https://github.com/ripaclub/aclman
- * @copyright   Copyright (c) 2014, RipaClub
+ * @copyright   Copyright (c) 2015, RipaClub
  * @license     http://opensource.org/licenses/BSD-2-Clause Simplified BSD License
  */
 namespace AclManTest\Storage\Adapter\ArrayAdapter;
@@ -193,12 +193,9 @@ class ArrayAdapterTest extends AclManTestCase
         $this->assertCount(1, $this->adapter->getParentRoles('role2'));
     }
 
-    /**
-     * @expectedException \AclMan\Exception\RoleNotExistException
-     */
-    public function testGetParentRolesException()
+    public function testGetParentRolesEmptyArray()
     {
-        $this->adapter->getParentRoles('role1');
+        $this->assertEmpty($this->adapter->getParentRoles('role1'));
     }
 
     /**
@@ -470,7 +467,7 @@ class ArrayAdapterTest extends AclManTestCase
     /**
      * @depends testAddPermission
      */
-    public function testGetPermission()
+    public function testGetPermissions()
     {
         $this->adapter->addRoles(['role1']);
         $this->assertCount(0, $this->adapter->getPermissions('role1'));
@@ -567,7 +564,7 @@ class ArrayAdapterTest extends AclManTestCase
         $this->assertTrue($adapter->hasResource('resource1'));
         $this->assertTrue($adapter->hasResource('resource2'));
 
-        $role1Privileges =  $adapter->getPermissions('role1');
+        $role1Privileges = $adapter->getPermissions('role1');
 
         $this->assertCount(2, $role1Privileges);
 
@@ -585,7 +582,7 @@ class ArrayAdapterTest extends AclManTestCase
         $this->assertTrue($permission->isAllow());
         $this->assertNull($permission->getAssertion());
 
-        $role2Privileges =  $adapter->getPermissions('role2');
+        $role2Privileges = $adapter->getPermissions('role2');
         $this->assertCount(2, $role2Privileges);
 
         $permission = $role2Privileges[0];

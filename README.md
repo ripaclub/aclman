@@ -45,7 +45,7 @@ Add `ripaclub/aclman` to your `composer.json`.
 ```
 {
    "require": {
-       "ripaclub/aclman": "v0.1.0"
+       "ripaclub/aclman": "~0.2.0"
    }
 }
 ```

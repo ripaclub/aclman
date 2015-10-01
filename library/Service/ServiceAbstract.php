@@ -3,7 +3,7 @@
  * ACL Manager
  *
  * @link        https://github.com/ripaclub/aclman
- * @copyright   Copyright (c) 2014, RipaClub
+ * @copyright   Copyright (c) 2015, RipaClub
  * @license     http://opensource.org/licenses/BSD-2-Clause Simplified BSD License
  */
 namespace AclMan\Service;
@@ -14,8 +14,10 @@ use AclMan\Permission\GenericPermission;
 use AclMan\Resource\ResourceCheckTrait;
 use AclMan\Role\RoleCheckTrait;
 use AclMan\Storage\StorageAwareTrait;
+use Zend\Permissions\Acl\Assertion\AssertionInterface;
 use Zend\Permissions\Acl\Resource;
-use Zend\Permissions\Acl\Role;
+use Zend\Permissions\Acl\Role\RoleInterface;
+use Zend\Stdlib\ArrayUtils;
 
 /**
  * Class ServiceAbstract
@@ -41,19 +43,20 @@ class ServiceAbstract implements ServiceInterface
     /**
      * Add roles from storage
      *
-     * @param string|Role  $role
-     * @return self
+     * @param string|RoleInterface $role
+     * @param string|array|RoleInterface $parents
+     * @return $this
      */
-    public function addRole($role)
+    public function addRole($role, $parents = null)
     {
-        $this->getAcl()->addRole($role);
+        $this->getAcl()->addRole($role, $parents);
         return $this;
     }
 
     /**
      * Check if exist role
      *
-     * @param string|Role $role
+     * @param string|RoleInterface $role
      * @return bool
      */
     public function hasRole($role)
@@ -70,8 +73,8 @@ class ServiceAbstract implements ServiceInterface
     }
 
     /**
-     * @param string|Role $role
-     * @return Role\RoleInterface
+     * @param string|RoleInterface $role
+     * @return RoleInterface
      */
     public function getRole($role)
     {
@@ -83,31 +86,34 @@ class ServiceAbstract implements ServiceInterface
      */
     public function loadResource($role = null, $resource = null)
     {
-        $role = ($role instanceof Role\RoleInterface) ? $role->getRoleId() : $role;
+        $role = ($role instanceof RoleInterface) ? $role->getRoleId() : $role;
         $resource = ($resource instanceof Resource\ResourceInterface) ? $resource->getResourceId() : $resource;
-        // star recursion
+        // start recursion
         if (isset($this->loaded[(string)$role]) && isset($this->loaded[(string)$role][(string)$resource])) {
-            return;
+            return true;
         }
-
 
         if (!isset($this->loaded[(string)$role])) {
             $this->loaded[(string)$role] = [];
         }
         $this->loaded[(string)$role][(string)$resource] = true;
 
-        if ($role || $resource) {
-            $this->loadResource();
+        $parentRoles = [];
+        if ($role && ($parentRoles = $this->getStorage()->getParentRoles($role))) {
+            foreach ($parentRoles as $parentRole) {
+                $this->loadResource($parentRole, $resource);
+            }
         }
 
         if ($role && $resource) {
+            $this->loadResource(); // ensures loading for ALL_ROLES and ALL_RESOURCES
             $this->loadResource(null, $resource);
             $this->loadResource($role, null);
         }
         // end recursion
 
         if ($role && !$this->getAcl()->hasRole($role)) {
-            $this->getAcl()->addRole($role);
+            $this->getAcl()->addRole($role, $parentRoles);
         }
 
         if ($resource && !$this->getAcl()->hasResource($resource)) {
@@ -115,12 +121,12 @@ class ServiceAbstract implements ServiceInterface
         }
 
         $permissions = $this->getStorage()->getPermissions($role, $resource);
-        //var_dump($permissions);
         if (count($permissions) > 0) {
             /* @var $permission GenericPermission */
             foreach ($permissions as $permission) {
                 $assert = null;
                 if ($permission->getAssertion()) {
+                    /** @var $assert AssertionInterface */
                     $assert = $this->getPluginManager()->get($permission->getAssertion());
                 }
                 // When load multiple resource
@@ -128,21 +134,13 @@ class ServiceAbstract implements ServiceInterface
                     $this->getAcl()->addResource($permission->getResourceId());
                 }
 
-                if ($permission->isAllow()) {
-                    $this->getAcl()->allow(
-                        $permission->getRoleId(),
-                        $permission->getResourceId(),
-                        $permission->getPrivilege(),
-                        $assert
-                    );
-                } else {
-                    $this->getAcl()->deny(
-                        $permission->getRoleId(),
-                        $permission->getResourceId(),
-                        $permission->getPrivilege(),
-                        $assert
-                    );
-                }
+                $method = $permission->isAllow() ? 'allow' : 'deny';
+                $this->getAcl()->{$method}(
+                    $permission->getRoleId(),
+                    $permission->getResourceId(),
+                    $permission->getPrivilege(),
+                    $assert
+                );
             }
             return true;
         }
@@ -171,7 +169,7 @@ class ServiceAbstract implements ServiceInterface
      */
     public function setAllowNotFoundResource($allowNotFoundResource)
     {
-        $this->allowNotFoundResource = (boolean) $allowNotFoundResource;
+        $this->allowNotFoundResource = (boolean)$allowNotFoundResource;
         if ($this->allowNotFoundResource) {
             $this->getAcl()->allow();
         } else {

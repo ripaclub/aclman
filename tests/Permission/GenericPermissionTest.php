@@ -3,7 +3,7 @@
  * ACL Manager
  *
  * @link        https://github.com/ripaclub/aclman
- * @copyright   Copyright (c) 2014, RipaClub
+ * @copyright   Copyright (c) 2015, RipaClub
  * @license     http://opensource.org/licenses/BSD-2-Clause Simplified BSD License
  */
 namespace AclManTest\Permission;
@@ -54,7 +54,6 @@ class GenericPermissionTest extends AclManTestCase
         $this->assertFalse($this->permission->isAllow());
         $this->assertSame('test', $this->permission->getAssertion());
         $this->assertSame('add', $this->permission->getPrivilege());
-
     }
 
     public function testSetterRoleResource()

@@ -3,7 +3,7 @@
  * ACL Manager
  *
  * @link        https://github.com/ripaclub/aclman
- * @copyright   Copyright (c) 2014, RipaClub
+ * @copyright   Copyright (c) 2015, RipaClub
  * @license     http://opensource.org/licenses/BSD-2-Clause Simplified BSD License
  */
 namespace AclMan\Storage\Adapter\ArrayAdapter;
@@ -19,7 +19,7 @@ class ArrayAdapterAbstractServiceFactory implements AbstractFactoryInterface
     /**
      * @var string
      */
-    protected $configKey = 'aclManArrayAdapterStorage'; // FIXME: change config node name
+    protected $configKey = 'aclManArrayAdapterStorage'; // FIXME: change config node name (0.3.x)
 
     /**
      * @var array
@@ -59,8 +59,8 @@ class ArrayAdapterAbstractServiceFactory implements AbstractFactoryInterface
      */
     public function createServiceWithName(ServiceLocatorInterface $serviceLocator, $name, $requestedName)
     {
-         $config = $this->getConfig($serviceLocator)[$requestedName];
-         return new ArrayAdapter($config);
+        $config = $this->getConfig($serviceLocator)[$requestedName];
+        return new ArrayAdapter($config);
     }
 
     /**
