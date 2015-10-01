@@ -44,11 +44,12 @@ class ServiceAbstract implements ServiceInterface
      * Add roles from storage
      *
      * @param string|RoleInterface $role
-     * @return self
+     * @param string|array|RoleInterface $parents
+     * @return $this
      */
-    public function addRole($role)
+    public function addRole($role, $parents = null)
     {
-        $this->getAcl()->addRole($role);
+        $this->getAcl()->addRole($role, $parents);
         return $this;
     }
 
@@ -97,16 +98,22 @@ class ServiceAbstract implements ServiceInterface
         }
         $this->loaded[(string)$role][(string)$resource] = true;
 
-        // ensures loading for ALL_ROLES and ALL_RESOURCES
-        $this->loadResource();
+        $parentRoles = [];
+        if ($role && ($parentRoles = $this->getStorage()->getParentRoles($role))) {
+            foreach ($parentRoles as $parentRole) {
+                $this->loadResource($parentRole, $resource);
+            }
+        }
+
         if ($role && $resource) {
+            $this->loadResource(); // ensures loading for ALL_ROLES and ALL_RESOURCES
             $this->loadResource(null, $resource);
             $this->loadResource($role, null);
         }
         // end recursion
 
         if ($role && !$this->getAcl()->hasRole($role)) {
-            $this->getAcl()->addRole($role);
+            $this->getAcl()->addRole($role, $parentRoles);
         }
 
         if ($resource && !$this->getAcl()->hasResource($resource)) {

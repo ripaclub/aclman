@@ -21,7 +21,7 @@ use Zend\ServiceManager;
 /**
  * Class ServiceAbstractTest
  *
- * @grop integration
+ * @group integration
  */
 class ServiceAbstractTest extends AclManTestCase
 {
@@ -55,8 +55,14 @@ class ServiceAbstractTest extends AclManTestCase
                                             'view'
                                         ]
                                     ]
-                                ]
-                            ]
+                                ],
+                                'resource3' => [
+                                    [
+                                        'allow' => true,
+                                        'privileges' => ['PUT']
+                                    ]
+                                ],
+                            ],
                         ],
                         'role2' => [
                             'parents' => [
@@ -234,24 +240,26 @@ class ServiceAbstractTest extends AclManTestCase
     }
 
 
-    public function _testHasService()
+    public function testHasService()
     {
         $this->assertTrue($this->serviceManager->has('AclService'));
     }
 
-    public function _testIsAllowed()
+    public function testIsAllowed()
     {
-        $acl = new Acl();
+        $acl = new Acl;
         $acl->addRole('role1');
         $acl->addResource('resource1');
         $acl->allow('role1', 'resource1', 'view');
         $acl->addResource('resource2');
-        $acl->allow('role1', 'resource2', 'view', new Assertion1());
+        $acl->addResource('resource3');
+        $acl->allow('role1', 'resource2', 'view', new Assertion1);
+        $acl->allow('role1', 'resource3', 'PUT');
         $acl->addRole('role2', ['role1']);
         $acl->allow('role2', 'resource1', 'add');
         $acl->deny('role2', 'resource1', 'view');
         $acl->allow('role2', 'resource2', 'add');
-        $acl->allow('role2', 'resource2', 'view', new Assertion2());
+        $acl->allow('role2', 'resource2', 'view', new Assertion2);
 
         /** @var $service Service */
         $service = $this->serviceManager->get('AclService');
@@ -273,11 +281,15 @@ class ServiceAbstractTest extends AclManTestCase
             $acl->isAllowed('role2', 'resource1', 'add'),
             $service->isAllowed('role2', 'resource1', 'add')
         );
+        $this->assertSame(
+            $acl->isAllowed('role2', 'resource3', 'PUT'),
+            $service->isAllowed('role2', 'resource3', 'PUT')
+        );
     }
 
-    public function testAllRolesIsAllowed()
+    public function testAllRolesAreAllowed()
     {
-        $acl = new Acl();
+        $acl = new Acl;
         $acl->addRole('role1');
         $acl->addRole('role2');
         $acl->addRole('role3');

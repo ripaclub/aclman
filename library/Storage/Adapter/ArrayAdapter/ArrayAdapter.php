@@ -163,6 +163,8 @@ class ArrayAdapter implements StorageInterface
     }
 
     /**
+     * FIXME: Review, it is useful? Upserts parents?
+     *
      * @param $role
      * @param array $parents
      * @return bool
@@ -198,21 +200,18 @@ class ArrayAdapter implements StorageInterface
         }
     }
 
-
     /**
      * @param $role
      * @return array
-     * @throws RoleNotExistException
      */
     public function getParentRoles($role)
     {
         $role = $this->checkRole($role);
         $roleId = $role->getRoleId();
-        if (array_key_exists($roleId, $this->roles)) {
-            return $this->roles[$roleId][self::NODE_PARENTS_ROLE];
-        } else {
-            throw new RoleNotExistException(sprintf('Role %s not stored', $roleId));
+        if (!array_key_exists($roleId, $this->roles)) {
+            return [];
         }
+        return $this->roles[$roleId][self::NODE_PARENTS_ROLE];
     }
 
     /**
@@ -245,8 +244,8 @@ class ArrayAdapter implements StorageInterface
 
     /**
      * @param array $resources
-     * @return self
-     * @throws InvalidParameterException
+     * @return $this
+     * @throws ResourceAlreadyExistException
      */
     public function addResources(array $resources)
     {
@@ -364,7 +363,7 @@ class ArrayAdapter implements StorageInterface
 
     /**
      * @param array $permissions
-     * @return self
+     * @return $this
      */
     public function addPermissions(array $permissions)
     {

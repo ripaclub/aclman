@@ -9,6 +9,11 @@
             <directory suffix=".php">library</directory>
         </whitelist>
     </filter>
+    <groups>
+        <exclude>
+            <group>integration</group>
+        </exclude>
+    </groups>
     <logging>
         <log type="coverage-text" target="php://stdout" showUncoveredFiles="false"/>
         <log type="coverage-clover" target="./build/logs/clover.xml"/>

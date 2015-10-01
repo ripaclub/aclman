@@ -193,12 +193,9 @@ class ArrayAdapterTest extends AclManTestCase
         $this->assertCount(1, $this->adapter->getParentRoles('role2'));
     }
 
-    /**
-     * @expectedException \AclMan\Exception\RoleNotExistException
-     */
-    public function testGetParentRolesException()
+    public function testGetParentRolesEmptyArray()
     {
-        $this->adapter->getParentRoles('role1');
+        $this->assertEmpty($this->adapter->getParentRoles('role1'));
     }
 
     /**
