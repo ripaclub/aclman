@@ -35,6 +35,14 @@ class ArrayAdapterTest extends AclManTestCase
                             'assert' => 'test',
                             'allow' => true,
                             'privilege' => 'add'
+                        ],
+                        [
+                            'assert' => [
+                                'test1',
+                                'test2'
+                            ],
+                            'allow' => true,
+                            'privilege' => 'add'
                         ]
                     ]
                 ]
@@ -547,7 +555,7 @@ class ArrayAdapterTest extends AclManTestCase
         $this->assertTrue($adapter->hasResource('resource1'));
         $this->assertTrue($adapter->hasResource('resource2'));
 
-        $this->assertCount(2, $adapter->getPermissions('role1'));
+        $this->assertCount(3, $adapter->getPermissions('role1'));
         $this->assertCount(2, $adapter->getPermissions('role2'));
     }
 

@@ -8,7 +8,6 @@
  */
 namespace AclMan\Assertion;
 
-use Zend\Permissions\Acl\Assertion\AssertionManager;
 use Zend\ServiceManager\Config;
 use Zend\ServiceManager\FactoryInterface;
 use Zend\ServiceManager\ServiceLocatorInterface;

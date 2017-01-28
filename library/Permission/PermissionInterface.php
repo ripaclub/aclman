@@ -19,14 +19,14 @@ interface PermissionInterface extends ResourceInterface, RoleInterface
     /**
      * Retrieve assertion
      *
-     * @return string
+     * @return array
      */
     public function getAssertion();
 
     /**
      * Set assertion
      *
-     * @param string $assert
+     * @param array $assert
      * @return $this
      */
     public function setAssertion($assert);

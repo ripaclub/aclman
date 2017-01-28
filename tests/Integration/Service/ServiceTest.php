@@ -8,26 +8,28 @@
  */
 namespace AclManTest\Integration\Service;
 
-use AclMan\Service\Service;
+use AclMan\Permission\GenericPermission;
 use AclMan\Storage\StorageInterface;
 use AclManTest\AclManTestCase;
 use AclManTest\Integration\Service\TestAsset\Assertion\Assertion1;
 use AclManTest\Integration\Service\TestAsset\Assertion\Assertion2;
+use AclManTest\Integration\Service\TestAsset\Assertion\Assertion3;
 use Zend\Mvc\Service\ServiceManagerConfig;
 use Zend\Permissions\Acl\Acl;
+use Zend\Permissions\Acl\Assertion\AssertionAggregate;
 use Zend\Permissions\Acl\Assertion\AssertionManager;
+use Zend\Permissions\Acl\Resource\GenericResource;
+use Zend\Permissions\Acl\Role\GenericRole;
 use Zend\ServiceManager;
+use Zend\Validator\ValidatorPluginManager;
 
 /**
- * Class ServiceAbstractTest
- *
- * @group integration
+ * Class GenericPermissionTest
  */
-class ServiceAbstractTest extends AclManTestCase
+class ServiceTest extends AclManTestCase
 {
-    /**
-     * @var $service ServiceManager\ServiceManager
-     */
+    protected $permission;
+
     protected $serviceManager;
 
     public function setUp()
@@ -49,7 +51,7 @@ class ServiceAbstractTest extends AclManTestCase
                                 ],
                                 'resource2' => [
                                     [
-                                        'assert' => 'assertFalse',
+                                        'assert' => 'assertfalse',
                                         'allow' => true,
                                         'privileges' => [
                                             'view'
@@ -62,6 +64,39 @@ class ServiceAbstractTest extends AclManTestCase
                                         'privileges' => ['PUT']
                                     ]
                                 ],
+                                'resource4' => [
+                                    [
+                                        'allow' => true,
+                                        'privileges' => [
+                                            'add' => [
+                                                'assert' => [
+                                                    'asserttrue',
+                                                ]
+                                            ],
+                                            'put' => [
+                                                'assert' => [
+                                                    'asserttrue',
+                                                    'assertfalse',
+                                                ]
+                                            ],
+                                            'view' => [
+                                                'assert' => [
+                                                    [
+                                                        'name' => 'assertconfig',
+                                                        'test' => 'test',
+                                                    ],
+                                                ]
+                                            ],
+                                            'patch' => [
+                                                'assert' => [
+                                                    [
+                                                        'name' => 'assertconfig',
+                                                    ],
+                                                ]
+                                            ],
+                                        ]
+                                    ]
+                                ]
                             ],
                         ],
                         'role2' => [
@@ -88,7 +123,7 @@ class ServiceAbstractTest extends AclManTestCase
                                         'privileges' => [
                                             'add',
                                             'view' => [
-                                                'assert' => 'assertTrue',
+                                                'assert' => 'asserttrue',
                                             ]
                                         ]
                                     ]
@@ -212,9 +247,10 @@ class ServiceAbstractTest extends AclManTestCase
             ],
             'aclman-assertion-manager' => [
                 'invokables' => [
-                    'assertTrue'  => 'AclManTest\Integration\Service\TestAsset\Assertion\Assertion2',
-                    'assertFalse' => 'AclManTest\Integration\Service\TestAsset\Assertion\Assertion1',
-                ],
+                    'asserttrue'  => 'AclManTest\Integration\Service\TestAsset\Assertion\Assertion2',
+                    'assertfalse' => 'AclManTest\Integration\Service\TestAsset\Assertion\Assertion1',
+                    'assertconfig' => 'AclManTest\Integration\Service\TestAsset\Assertion\Assertion3',
+                ]
             ],
         ];
 
@@ -239,7 +275,6 @@ class ServiceAbstractTest extends AclManTestCase
         $this->serviceManager->setService('PluginManager', new AssertionManager());
     }
 
-
     public function testHasService()
     {
         $this->assertTrue($this->serviceManager->has('AclService'));
@@ -253,12 +288,37 @@ class ServiceAbstractTest extends AclManTestCase
         $acl->allow('role1', 'resource1', 'view');
         $acl->addResource('resource2');
         $acl->addResource('resource3');
-        $acl->allow('role1', 'resource2', 'view', new Assertion1);
+        $acl->addResource('resource4');
+        $acl->allow('role1', 'resource2', 'view', new Assertion1());
         $acl->allow('role1', 'resource3', 'PUT');
+
+        $assert = new AssertionAggregate();
+        $assert->setAssertionManager($this->serviceManager->get('assertManager'));
+        $assert->addAssertion('asserttrue');
+        $acl->allow('role1', 'resource4', 'add', $assert);
+
+
+        $assert = new AssertionAggregate();
+        $assert->setAssertionManager($this->serviceManager->get('assertManager'));
+        $assert->addAssertion('assertfalse');
+        $acl->allow('role1', 'resource4', 'put', $assert);
+
+        $assert = new AssertionAggregate();
+        $assertConfig = $this->serviceManager->get('assertManager')->get('assertconfig');
+        $assertConfig->setTest('test');
+        $assert->addAssertion($assertConfig);
+        $acl->allow('role1', 'resource4', 'view', $assert);
+
+        $assert = new AssertionAggregate();
+        $assertConfig = $this->serviceManager->get('assertManager')->get('assertconfig');
+        $assert->addAssertion($assertConfig);
+        $acl->allow('role1', 'resource4', 'patch', $assert);
+
         $acl->addRole('role2', ['role1']);
         $acl->allow('role2', 'resource1', 'add');
         $acl->deny('role2', 'resource1', 'view');
         $acl->allow('role2', 'resource2', 'add');
+        $acl->allow('role2', 'resource2', 'view', new Assertion2());
         $acl->allow('role2', 'resource2', 'view', new Assertion2);
 
         /** @var $service Service */
@@ -285,11 +345,31 @@ class ServiceAbstractTest extends AclManTestCase
             $acl->isAllowed('role2', 'resource3', 'PUT'),
             $service->isAllowed('role2', 'resource3', 'PUT')
         );
+
+        $this->assertSame(
+            $acl->isAllowed('role1', 'resource4', 'add'),
+            $service->isAllowed('role1', 'resource4', 'add')
+        );
+        $this->assertSame(
+            $acl->isAllowed('role1', 'resource4', 'put'),
+            $service->isAllowed('role1', 'resource4', 'put')
+        );
+
+        $this->assertSame(
+            $acl->isAllowed('role1', 'resource4', 'view'),
+            $service->isAllowed('role1', 'resource4', 'view')
+        );
+
+
+        $this->assertSame(
+            $acl->isAllowed('role1', 'resource4', 'put'),
+            $service->isAllowed('role1', 'resource4', 'put')
+        );
     }
 
     public function testAllRolesAreAllowed()
     {
-        $acl = new Acl;
+        $acl = new Acl();
         $acl->addRole('role1');
         $acl->addRole('role2');
         $acl->addRole('role3');
