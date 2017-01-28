@@ -9,6 +9,7 @@
 namespace AclMan\Service;
 
 use AclMan\Acl\AclAwareTrait;
+use AclMan\Assertion\AssertionAggregate;
 use AclMan\Assertion\AssertionAwareTrait;
 use AclMan\Permission\GenericPermission;
 use AclMan\Resource\ResourceCheckTrait;
@@ -126,8 +127,23 @@ class ServiceAbstract implements ServiceInterface
             foreach ($permissions as $permission) {
                 $assert = null;
                 if ($permission->getAssertion()) {
+                    $assertConfig = $permission->getAssertion();
                     /** @var $assert AssertionInterface */
-                    $assert = $this->getPluginManager()->get($permission->getAssertion());
+                    if (is_array($assertConfig)) {
+                        if (is_array(current($assertConfig)) || count($assertConfig) > 1) {
+
+                            /** @var $assert AssertionAggregate */
+                            $assert = new AssertionAggregate();
+                            $assert->setAssertionManager($this->getPluginManager());
+                            foreach ($assertConfig as $item) {
+                                $assert->addAssertion($item);
+                            }
+                        } elseif (count($assertConfig) == 1) {
+                            $assert = $this->getPluginManager()->get(current($assertConfig));
+                        }
+                    } else {
+                        $assert = $this->getPluginManager()->get($permission->getAssertion());
+                    }
                 }
                 // When load multiple resource
                 if ($permission->getResourceId() && !$this->getAcl()->hasResource($permission->getResourceId())) {

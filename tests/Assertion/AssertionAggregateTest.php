@@ -8,15 +8,16 @@
  */
 namespace AclManTest\Assertion;
 
+use AclMan\Assertion\AssertionAggregate;
 use AclManTest\AclManTestCase;
 use Zend\Mvc\Service\ServiceManagerConfig;
 use Zend\Permissions\Acl\Assertion\AssertionManager;
 use Zend\ServiceManager;
 
 /**
- * Class AssertionManagerFactoryTest
+ * Class AssertionAggregateTest
  */
-class AssertionManagerFactoryTest extends AclManTestCase
+class AssertionAggregateTest extends AclManTestCase
 {
     /**
      * @var \Zend\ServiceManager\ServiceManager
@@ -38,43 +39,142 @@ class AssertionManagerFactoryTest extends AclManTestCase
         $sm->setService('Config', $config);
     }
 
-    public function testAssertPluginManager()
+    /**
+     * @expectedException Zend\Permissions\Acl\Exception\RuntimeException
+     */
+    public function testNotAssertionException()
     {
-        $pluginManager = $this->serviceManager->get('assertManager');
-        $this->assertInstanceOf('Zend\Permissions\Acl\Assertion\AssertionManager', $pluginManager);
+        $assertionAggregate = new AssertionAggregate();
+        $assertionAggregate->assert($this->getMock('Zend\Permissions\Acl\Acl'), $this->getMock('Zend\Permissions\Acl\Role\RoleInterface'));
     }
 
-    public function testAssetPluginManagerConfig()
+    /**
+     * @expectedException Zend\Permissions\Acl\Exception\RuntimeException
+     */
+    public function testNotAssertionManagerWithStringException()
     {
-        $config = [
-            'factories' => [
-                'assertManager' => 'AclMan\Assertion\AssertionManagerFactory',
-            ],
-            'aclman-assertion-manager' => [
-                'AclManTest\Assertion\TestAsset\Assertion\MockAssertion1' =>
-                    'AclManTest\Assertion\TestAsset\Assertion\MockAssertion1',
-                'invokables' => [
-                    'assert' => 'AclManTest\Assertion\TestAsset\Assertion\MockAssertion1',
-                ]
-            ]
-        ];
+        $assertionAggregate = new AssertionAggregate();
+        $assertionAggregate->addAssertions(['test']);
+        $assertionAggregate->assert($this->getMock('Zend\Permissions\Acl\Acl'), $this->getMock('Zend\Permissions\Acl\Role\RoleInterface'));
+    }
 
-        $sm = new ServiceManager\ServiceManager(
-            new ServiceManagerConfig($config)
+    /**
+     * @expectedException Zend\Permissions\Acl\Exception\RuntimeException
+     */
+    public function testNotAssertionManagerWithArrayException()
+    {
+        $assertionAggregate = new AssertionAggregate();
+        $assertionAggregate->addAssertions(['test' => ['test']]);
+        $assertionAggregate->assert($this->getMock('Zend\Permissions\Acl\Acl'), $this->getMock('Zend\Permissions\Acl\Role\RoleInterface'));
+    }
+
+    /**
+     * @expectedException Zend\Permissions\Acl\Exception\RuntimeException
+     */
+    public function testNotAssertionManagerWithArrayExceptionNoName()
+    {
+        $assertionAggregate = new AssertionAggregate();
+        $assertionAggregate->addAssertions(['test' => ['test' => 'test']]);
+        $assertionAggregate->setAssertionManager($this->getMock('Zend\Permissions\Acl\Assertion\AssertionManager'));
+        $assertionAggregate->assert($this->getMock('Zend\Permissions\Acl\Acl'), $this->getMock('Zend\Permissions\Acl\Role\RoleInterface'));
+    }
+
+
+    /**
+     *
+     */
+    public function testNameAssert()
+    {
+        $assertionAggregate = new AssertionAggregate();
+        $assertionAggregate->addAssertions(['test' => ['name' => 'nametest', 'test' => 'test']]);
+
+        $mockService = $this->getMock('Zend\Permissions\Acl\Assertion\AssertionInterface');
+
+        $mock =  $this->getMock('Zend\Permissions\Acl\Assertion\AssertionManager');
+        $mock->method('get')->willReturn($mockService);
+
+
+        $assertionAggregate->setAssertionManager($mock);
+        $this->assertFalse($assertionAggregate->assert($this->getMock('Zend\Permissions\Acl\Acl'), $this->getMock('Zend\Permissions\Acl\Role\RoleInterface')));
+    }
+
+    /**
+     * @expectedException Zend\Permissions\Acl\Exception\RuntimeException
+     */
+    public function testNotAssertionManagerWithNameClassException()
+    {
+        $assertionAggregate = new AssertionAggregate();
+        $assertionAggregate->addAssertions(["stdClass"]);
+
+        $this->assertFalse($assertionAggregate->assert($this->getMock('Zend\Permissions\Acl\Acl'), $this->getMock('Zend\Permissions\Acl\Role\RoleInterface')));
+    }
+
+    /**
+     * @expectedException Zend\Permissions\Acl\Exception\RuntimeException
+     */
+    public function testNotAssertionManagerWithClassException()
+    {
+        $assertionAggregate = new AssertionAggregate();
+        $assertionAggregate->addAssertions([new \stdClass()]);
+
+        $assertionAggregate->assert($this->getMock('Zend\Permissions\Acl\Acl'), $this->getMock('Zend\Permissions\Acl\Role\RoleInterface'));
+    }
+
+    /**
+     *
+     */
+    public function testNameClassAssert()
+    {
+        $assertionAggregate = new AssertionAggregate();
+        $assertionAggregate->addAssertions(['AclManTest\Integration\Service\TestAsset\Assertion\Assertion1']);
+
+        $this->assertFalse($assertionAggregate->assert($this->getMock('Zend\Permissions\Acl\Acl'), $this->getMock('Zend\Permissions\Acl\Role\RoleInterface')));
+    }
+
+    /**
+     *
+     */
+    public function testNameAssertFalse()
+    {
+        $assertionAggregate = new AssertionAggregate();
+        $assertionAggregate->addAssertions(['test']);
+
+        $mockService = $this->getMock('Zend\Permissions\Acl\Assertion\AssertionInterface');
+
+        $mock =  $this->getMock('Zend\Permissions\Acl\Assertion\AssertionManager');
+        $mock->method('get')->willReturn($mockService);
+        $mock->method('has')->willReturn(true);
+
+        $assertionAggregate->setAssertionManager($mock);
+        $this->assertFalse(
+            $assertionAggregate->assert(
+                $this->getMock('Zend\Permissions\Acl\Acl'),
+                $this->getMock('Zend\Permissions\Acl\Role\RoleInterface')
+            )
         );
+    }
 
-        $sm->setService('Config', $config);
+    /**
+     *
+     */
+    public function testNameAssertTrue()
+    {
+        $assertionAggregate = new AssertionAggregate();
+        $assertionAggregate->addAssertions(['test']);
 
-        /** @var $pluginManager AssertionManager */
-        $pluginManager = $sm->get('assertManager');
-        $this->assertInstanceOf('Zend\Permissions\Acl\Assertion\AssertionManager', $pluginManager);
-        $this->assertInstanceOf(
-            'Zend\Permissions\Acl\Assertion\AssertionInterface',
-            $pluginManager->get('AclManTest\Assertion\TestAsset\Assertion\MockAssertion1')
-        );
-        $this->assertInstanceOf(
-            'Zend\Permissions\Acl\Assertion\AssertionInterface',
-            $pluginManager->get('assert')
+        $mockService = $this->getMock('Zend\Permissions\Acl\Assertion\AssertionInterface');
+        $mockService->method('assert')->willReturn(true);
+
+        $mock =  $this->getMock('Zend\Permissions\Acl\Assertion\AssertionManager');
+        $mock->method('get')->willReturn($mockService);
+        $mock->method('has')->willReturn(true);
+
+        $assertionAggregate->setAssertionManager($mock);
+        $this->assertTrue(
+            $assertionAggregate->assert(
+                $this->getMock('Zend\Permissions\Acl\Acl'),
+                $this->getMock('Zend\Permissions\Acl\Role\RoleInterface')
+            )
         );
     }
 }

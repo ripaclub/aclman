@@ -16,9 +16,9 @@ use Zend\ServiceManager\ServiceLocatorAwareInterface;
 use Zend\ServiceManager\ServiceLocatorAwareTrait;
 
 /**
- * Class Assertion1
+ * Class Assertion3
  */
-class Assertion1 implements AssertionInterface, ServiceLocatorAwareInterface
+class Assertion3 implements AssertionInterface, ServiceLocatorAwareInterface
 {
     use ServiceLocatorAwareTrait;
 
@@ -36,6 +36,9 @@ class Assertion1 implements AssertionInterface, ServiceLocatorAwareInterface
      */
     public function assert(Acl $acl, RoleInterface $role = null, ResourceInterface $resource = null, $privilege = null)
     {
+        if ($this->getTest() == 'test') {
+            return true;
+        }
         return false;
     }
 

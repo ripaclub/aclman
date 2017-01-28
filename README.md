@@ -112,7 +112,11 @@ Finally, our storage configuration.
                     ],
                     'Resource2' => [
                         [
-                            'assert' => 'assertAlias',
+                            'assert' => [
+                                'assertAlias' => [
+                                    'config' => 'test'
+                                ],
+                            ],
                             'allow' => true,
                             'privilege' => 'view'
                         ]

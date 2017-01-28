@@ -1,15 +1,22 @@
 <?php
-/**
- * Created by PhpStorm.
- * User: visa
- * Date: 27/01/17
- * Time: 17.19
- */
-
 namespace AclMan\Assertion;
 
+use Zend\Permissions\Acl\Assertion\AssertionManager as BaseAssertionManager;
 
-class AssertionManager
+/**
+ * Class AssertionManager
+ */
+class AssertionManager extends BaseAssertionManager
 {
+    /**
+     * zend-servicemanager v3 compatibility
+     * @var bool
+     */
+    protected $shareByDefault = false;
 
+    /**
+     * zend-servicemanager v2 compatibility
+     * @var bool
+     */
+    protected $sharedByDefault = false;
 }
