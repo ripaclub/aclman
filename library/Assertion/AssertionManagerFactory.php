@@ -8,8 +8,9 @@
  */
 namespace AclMan\Assertion;
 
+use Interop\Container\ContainerInterface;
 use Zend\ServiceManager\Config;
-use Zend\ServiceManager\FactoryInterface;
+use Zend\ServiceManager\Factory\FactoryInterface;
 use Zend\ServiceManager\ServiceLocatorInterface;
 
 /**
@@ -30,12 +31,15 @@ class AssertionManagerFactory implements FactoryInterface
      * @param ServiceLocatorInterface $serviceLocator
      * @return AssertionManager
      */
-    public function createService(ServiceLocatorInterface $serviceLocator)
+    public function __invoke(ContainerInterface $container, $requestedName, array $options = null)
     {
-        $config = $serviceLocator->get('Config');
-        $configManager = (isset($config['aclman-assertion-manager'])) ? new Config(
-            $config['aclman-assertion-manager']
-        ) : null;
-        return new AssertionManager($configManager);
+        $configPM = [];
+        if ($container->has('Config')) {
+            $config = $container->get('Config');
+            $configPM = (isset($config['aclman-assertion-manager'])) ? $config['aclman-assertion-manager'] : [];
+        }
+
+        $manager = new AssertionManager($container);
+        return $manager->configure($configPM);
     }
 }

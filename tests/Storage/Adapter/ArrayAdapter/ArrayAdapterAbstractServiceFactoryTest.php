@@ -35,12 +35,11 @@ class ArrayAdapterAbstractServiceFactoryTest extends AclManTestCase
             ],
         ];
 
-        $this->serviceManager = new ServiceManager\ServiceManager(
-            new ServiceManagerConfig([
+        $this->serviceManager = new ServiceManager\ServiceManager([
                 'abstract_factories' => [
                     'AclMan\Storage\Adapter\ArrayAdapter\ArrayAdapterAbstractServiceFactory',
                 ],
-            ])
+            ]
         );
 
         $this->serviceManager->setService('Config', $config);
@@ -56,22 +55,11 @@ class ArrayAdapterAbstractServiceFactoryTest extends AclManTestCase
 
     public function testHasServiceWithoutConfig()
     {
-        $this->serviceManager = new ServiceManager\ServiceManager(
-            new ServiceManagerConfig([
-                'abstract_factories' => [
-                    'AclMan\Storage\Adapter\ArrayAdapter\ArrayAdapterAbstractServiceFactory',
-                ],
-            ])
-        );
-        $this->assertFalse($this->serviceManager->has('ArrayStorage1'));
-
-        $this->serviceManager = new ServiceManager\ServiceManager(
-            new ServiceManagerConfig([
-                'abstract_factories' => [
-                    'AclMan\Storage\Adapter\ArrayAdapter\ArrayAdapterAbstractServiceFactory',
-                ],
-            ])
-        );
+        $this->serviceManager = new ServiceManager\ServiceManager([
+            'abstract_factories' => [
+                'AclMan\Storage\Adapter\ArrayAdapter\ArrayAdapterAbstractServiceFactory',
+            ],
+        ]);
         $this->serviceManager->setService('Config', []);
         $this->assertFalse($this->serviceManager->has('ArrayStorage1'));
     }

@@ -36,16 +36,14 @@ class ServiceFactoryTest extends AclManTestCase
             ],
         ];
         $this->serviceManager = new ServiceManager\ServiceManager(
-            new ServiceManagerConfig(
-                [
-                    'abstract_factories' => [
-                        'AclMan\Service\ServiceFactory',
-                    ],
-                    'factories' => [
-                        'Zend\Permissions\Acl\Assertion\AssertionManager' => 'AclMan\Assertion\AssertionManagerFactory'
-                    ]
+            [
+                'abstract_factories' => [
+                    'AclMan\Service\ServiceFactory',
+                ],
+                'factories' => [
+                    'Zend\Permissions\Acl\Assertion\AssertionManager' => 'AclMan\Assertion\AssertionManagerFactory'
                 ]
-            )
+            ]
         );
 
         $this->serviceManager->setService('Config', $config);
@@ -56,13 +54,11 @@ class ServiceFactoryTest extends AclManTestCase
     public function testCreateServiceShouldThrowServiceNotCreatedExceptionWhenStorageIsInvalid()
     {
         $sm = new ServiceManager\ServiceManager(
-            new ServiceManagerConfig(
-                [
-                    'abstract_factories' => [
-                        'AclMan\Service\ServiceFactory',
-                    ],
-                ]
-            )
+            [
+                'abstract_factories' => [
+                    'AclMan\Service\ServiceFactory',
+                ],
+            ]
         );
         $sm->setService(
             'Config',
@@ -80,9 +76,9 @@ class ServiceFactoryTest extends AclManTestCase
         $sm->setService('PluginManager', $this->getMockBuilder('AclMan\Assertion\AssertionPluginManager')->getMock());
         $sm->setService('InvalidStorage', $this->getMockBuilder('\ArrayObject')->getMock());
         $sf = new ServiceFactory();
-        $this->assertTrue($sf->canCreateServiceWithName($sm, null, 'AclService'));
+        $this->assertTrue($sf->canCreate($sm, 'AclService'));
         $this->setExpectedException('\AclMan\Exception\ServiceNotCreatedException');
-        $sf->createServiceWithName($sm, null, 'AclService');
+        $sf->__invoke($sm, 'AclService');
     }
 
     public function testHasService()
@@ -95,25 +91,11 @@ class ServiceFactoryTest extends AclManTestCase
     public function testHasServiceWithoutConfig()
     {
         $this->serviceManager = new ServiceManager\ServiceManager(
-            new ServiceManagerConfig(
-                [
-                    'abstract_factories' => [
-                        'AclMan\Service\ServiceFactory',
-                    ],
-                ]
-            )
-        );
-
-        $this->assertFalse($this->serviceManager->has('AclService'));
-
-        $this->serviceManager = new ServiceManager\ServiceManager(
-            new ServiceManagerConfig(
-                [
-                    'abstract_factories' => [
-                        'AclMan\Service\ServiceFactory',
-                    ],
-                ]
-            )
+            [
+                'abstract_factories' => [
+                    'AclMan\Service\ServiceFactory',
+                ],
+            ]
         );
 
         $this->serviceManager->setService('Config', []);

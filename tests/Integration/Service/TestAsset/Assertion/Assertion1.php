@@ -12,16 +12,12 @@ use Zend\Permissions\Acl\Acl;
 use Zend\Permissions\Acl\Assertion\AssertionInterface;
 use Zend\Permissions\Acl\Resource\ResourceInterface;
 use Zend\Permissions\Acl\Role\RoleInterface;
-use Zend\ServiceManager\ServiceLocatorAwareInterface;
-use Zend\ServiceManager\ServiceLocatorAwareTrait;
 
 /**
  * Class Assertion1
  */
-class Assertion1 implements AssertionInterface, ServiceLocatorAwareInterface
+class Assertion1 implements AssertionInterface
 {
-    use ServiceLocatorAwareTrait;
-
     /**
      * {@inheritdoc}
      */

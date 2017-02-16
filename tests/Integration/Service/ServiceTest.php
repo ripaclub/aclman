@@ -255,24 +255,21 @@ class ServiceTest extends AclManTestCase
         ];
 
         $this->serviceManager = new ServiceManager\ServiceManager(
-            new ServiceManagerConfig(
-                [
-                    'abstract_factories' => [
-                        'AclMan\Service\ServiceFactory',
-                        'AclMan\Storage\StorageFactory'
-                    ],
-                    'factories' => [
-                        'assertManager' => 'AclMan\Assertion\AssertionManagerFactory'
-                    ],
-                    'invokables' => [
-                        'AclMan\Plugin\Manager' => 'AclManTest\Integration\Service\TestAsset\MockAssertionPluginManager'
-                    ],
-                ]
-            )
+            [
+                'abstract_factories' => [
+                    'AclMan\Service\ServiceFactory',
+                    'AclMan\Storage\StorageFactory'
+                ],
+                'factories' => [
+                    'assertManager' => 'AclMan\Assertion\AssertionManagerFactory'
+                ],
+                'invokables' => [
+                    'AclMan\Plugin\Manager' => 'AclManTest\Integration\Service\TestAsset\MockAssertionPluginManager'
+                ],
+            ]
         );
 
         $this->serviceManager->setService('Config', $config);
-        $this->serviceManager->setService('PluginManager', new AssertionManager());
     }
 
     public function testHasService()

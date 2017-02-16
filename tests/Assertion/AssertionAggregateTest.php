@@ -32,9 +32,7 @@ class AssertionAggregateTest extends AclManTestCase
             ]
         ];
 
-        $sm = $this->serviceManager = new ServiceManager\ServiceManager(
-            new ServiceManagerConfig($config)
-        );
+        $sm = $this->serviceManager = new ServiceManager\ServiceManager($config);
 
         $sm->setService('Config', $config);
     }
@@ -75,7 +73,7 @@ class AssertionAggregateTest extends AclManTestCase
     {
         $assertionAggregate = new AssertionAggregate();
         $assertionAggregate->addAssertions(['test' => ['test' => 'test']]);
-        $assertionAggregate->setAssertionManager($this->getMock('Zend\Permissions\Acl\Assertion\AssertionManager'));
+        $assertionAggregate->setAssertionManager($this->getMockBuilder('Zend\Permissions\Acl\Assertion\AssertionManager')->disableOriginalConstructor()->getMock());
         $assertionAggregate->assert($this->getMock('Zend\Permissions\Acl\Acl'), $this->getMock('Zend\Permissions\Acl\Role\RoleInterface'));
     }
 
@@ -90,7 +88,7 @@ class AssertionAggregateTest extends AclManTestCase
 
         $mockService = $this->getMock('Zend\Permissions\Acl\Assertion\AssertionInterface');
 
-        $mock =  $this->getMock('Zend\Permissions\Acl\Assertion\AssertionManager');
+        $mock =  $this->getMockBuilder('Zend\Permissions\Acl\Assertion\AssertionManager')->disableOriginalConstructor()->getMock();
         $mock->method('get')->willReturn($mockService);
 
 
@@ -121,6 +119,22 @@ class AssertionAggregateTest extends AclManTestCase
     }
 
     /**
+     * @expectedException Zend\Permissions\Acl\Exception\RuntimeException
+     */
+    public function testNotAssertionManagerNotServiceFound()
+    {
+        $assertionAggregate = new AssertionAggregate();
+        $assertionAggregate->setMode(AssertionAggregate::MODE_AT_LEAST_ONE);
+        $assertionAggregate->addAssertions(['test']);
+
+        $mock =  $this->getMockBuilder('Zend\Permissions\Acl\Assertion\AssertionManager')->disableOriginalConstructor()->getMock();
+        $mock->method('has')->willReturn(false);
+
+        $assertionAggregate->setAssertionManager($mock);
+        $assertionAggregate->assert($this->getMock('Zend\Permissions\Acl\Acl'), $this->getMock('Zend\Permissions\Acl\Role\RoleInterface'));
+    }
+
+    /**
      *
      */
     public function testNameClassAssert()
@@ -141,7 +155,7 @@ class AssertionAggregateTest extends AclManTestCase
 
         $mockService = $this->getMock('Zend\Permissions\Acl\Assertion\AssertionInterface');
 
-        $mock =  $this->getMock('Zend\Permissions\Acl\Assertion\AssertionManager');
+        $mock =  $this->getMockBuilder('Zend\Permissions\Acl\Assertion\AssertionManager')->disableOriginalConstructor()->getMock();
         $mock->method('get')->willReturn($mockService);
         $mock->method('has')->willReturn(true);
 
@@ -165,12 +179,34 @@ class AssertionAggregateTest extends AclManTestCase
         $mockService = $this->getMock('Zend\Permissions\Acl\Assertion\AssertionInterface');
         $mockService->method('assert')->willReturn(true);
 
-        $mock =  $this->getMock('Zend\Permissions\Acl\Assertion\AssertionManager');
+        $mock =  $this->getMockBuilder('Zend\Permissions\Acl\Assertion\AssertionManager')->disableOriginalConstructor()->getMock();
         $mock->method('get')->willReturn($mockService);
         $mock->method('has')->willReturn(true);
 
         $assertionAggregate->setAssertionManager($mock);
         $this->assertTrue(
+            $assertionAggregate->assert(
+                $this->getMock('Zend\Permissions\Acl\Acl'),
+                $this->getMock('Zend\Permissions\Acl\Role\RoleInterface')
+            )
+        );
+    }
+
+    public function testNameAssertFalseSpecial()
+    {
+        $assertionAggregate = new AssertionAggregate();
+        $assertionAggregate->setMode(AssertionAggregate::MODE_AT_LEAST_ONE);
+        $assertionAggregate->addAssertions(['test']);
+
+        $mockService = $this->getMock('Zend\Permissions\Acl\Assertion\AssertionInterface');
+        $mockService->method('assert')->willReturn(false);
+
+        $mock =  $this->getMockBuilder('Zend\Permissions\Acl\Assertion\AssertionManager')->disableOriginalConstructor()->getMock();
+        $mock->method('get')->willReturn($mockService);
+        $mock->method('has')->willReturn(true);
+
+        $assertionAggregate->setAssertionManager($mock);
+        $this->assertFalse(
             $assertionAggregate->assert(
                 $this->getMock('Zend\Permissions\Acl\Acl'),
                 $this->getMock('Zend\Permissions\Acl\Role\RoleInterface')

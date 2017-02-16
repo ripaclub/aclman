@@ -10,8 +10,9 @@ namespace AclMan\Service;
 
 use AclMan\Exception\ServiceNotCreatedException;
 use AclMan\Storage\StorageInterface;
+use Interop\Container\ContainerInterface;
 use Zend\Permissions\Acl\Acl;
-use Zend\ServiceManager\AbstractFactoryInterface;
+use Zend\ServiceManager\Factory\AbstractFactoryInterface;
 use Zend\ServiceManager\ServiceLocatorInterface;
 
 /**
@@ -39,16 +40,13 @@ class ServiceFactory implements AbstractFactoryInterface
     protected $config;
 
     /**
-     * Determine if we can create a service with name
-     *
-     * @param ServiceLocatorInterface $serviceLocator
-     * @param $name
-     * @param $requestedName
+     * @param ContainerInterface $container
+     * @param string $requestedName
      * @return bool
      */
-    public function canCreateServiceWithName(ServiceLocatorInterface $serviceLocator, $name, $requestedName)
+    public function canCreate(ContainerInterface $container, $requestedName)
     {
-        $config = $this->getConfig($serviceLocator);
+        $config = $this->getConfig($container);
         if (empty($config)) {
             return false;
         }
@@ -59,31 +57,28 @@ class ServiceFactory implements AbstractFactoryInterface
             // Check Storage
             isset($config[$requestedName]['storage']) &&
             is_string($config[$requestedName]['storage']) &&
-            $serviceLocator->has($config[$requestedName]['storage']) &&
+            $container->has($config[$requestedName]['storage']) &&
             // Check Storage
             isset($config[$requestedName]['plugin_manager']) &&
             is_string($config[$requestedName]['plugin_manager']) &&
-            $serviceLocator->has($config[$requestedName]['plugin_manager'])
+            $container->has($config[$requestedName]['plugin_manager'])
         );
     }
 
     /**
-     * Create service with name
-     *
-     * @param ServiceLocatorInterface $serviceLocator
-     * @param $name
-     * @param $requestedName
-     * @return StorageInterface
-     * @throws ServiceNotCreatedException
+     * @param ContainerInterface $container
+     * @param string $requestedName
+     * @param array|null $options
+     * @return Service
      */
-    public function createServiceWithName(ServiceLocatorInterface $serviceLocator, $name, $requestedName)
+    public function __invoke(ContainerInterface $container, $requestedName, array $options = null)
     {
-        $config = $this->getConfig($serviceLocator)[$requestedName];
+        $config = $this->getConfig($container)[$requestedName];
         $service = new $this->serviceName();
 
         // Storage
         /** @var $storage StorageInterface */
-        $storage = $serviceLocator->get($config['storage']);
+        $storage = $container->get($config['storage']);
         if (!$storage instanceof StorageInterface) {
             throw new ServiceNotCreatedException(sprintf(
                 '"%s" expectes a AclMan\Storage\StorageInterface is set in the config; received "%s"',
@@ -92,7 +87,7 @@ class ServiceFactory implements AbstractFactoryInterface
             ));
         }
         // PluginManager
-        $pluginManager = $serviceLocator->get($config['plugin_manager']);
+        $pluginManager = $container->get($config['plugin_manager']);
 
         // Config Service
         $acl = new Acl();
@@ -109,23 +104,16 @@ class ServiceFactory implements AbstractFactoryInterface
     }
 
     /**
-     * Get model configuration, if any
-     *
-     * @param  ServiceLocatorInterface $serviceLocator
+     * @param ContainerInterface $container,
      * @return array
      */
-    protected function getConfig(ServiceLocatorInterface $serviceLocator)
+    protected function getConfig(ContainerInterface $container)
     {
         if ($this->config !== null) {
             return $this->config;
         }
 
-        if (!$serviceLocator->has('Config')) {
-            $this->config = [];
-            return $this->config;
-        }
-
-        $config = $serviceLocator->get('Config');
+        $config = $container->get('Config');
         if (!isset($config[$this->configKey]) || !is_array($config[$this->configKey])) {
             $this->config = [];
             return $this->config;

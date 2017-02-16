@@ -28,7 +28,7 @@ class AssertionAwareTraitTest extends AclManTestCase
 
     public function testRoleAwareTraitGetSet()
     {
-        $assertionManager = new AssertionManager();
+        $assertionManager = new AssertionManager($this->getMockBuilder('Interop\Container\ContainerInterface')->getMock());
         $this->mockTrait->setPluginManager($assertionManager);
         $this->assertSame($assertionManager, $this->mockTrait->getPluginManager());
     }

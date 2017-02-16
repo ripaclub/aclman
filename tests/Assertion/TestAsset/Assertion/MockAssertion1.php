@@ -18,10 +18,8 @@ use Zend\ServiceManager\ServiceLocatorAwareTrait;
 /**
  * Class MockAssertion1
  */
-class MockAssertion1 implements AssertionInterface, ServiceLocatorAwareInterface
+class MockAssertion1 implements AssertionInterface
 {
-    use ServiceLocatorAwareTrait;
-
     /**
      * {@inheritdoc}
      */

@@ -13,6 +13,7 @@ use AclManTest\AclManTestCase;
 use AclManTest\Assertion\TestAsset\Assertion\MockAssertion1;
 use Zend\Permissions\Acl\Acl;
 use Zend\Permissions\Acl\Assertion\AssertionManager;
+use Zend\ServiceManager\ServiceManager;
 
 /**
  * Class ServiceAbstractTest
@@ -197,7 +198,7 @@ class ServiceAbstractTest extends AclManTestCase
     {
         $this->service->addRole('role1');
 
-        $pluginManager = new AssertionManager();
+        $pluginManager = new AssertionManager(new ServiceManager([]));
 
         $pluginManager->setService('testAssert', new MockAssertion1());
 

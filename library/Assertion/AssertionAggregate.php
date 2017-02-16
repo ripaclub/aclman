@@ -52,11 +52,14 @@ class AssertionAggregate extends BaseAssertionAggregate
                     }
                     if ($this->getAssertionManager()->has($assertions)) {
                         $assertion = $this->getAssertionManager()->get($assertions);
+                    } else {
+                        throw new RuntimeException(sprintf(' Noi instace of %s found', $assertions));
                     }
                     break;
                 default:
                     throw new RuntimeException('Invalid params in aggregate Assertion');
             }
+
             $result = (bool)$assertion->assert($acl, $role, $resource, $privilege);
             if ($this->getMode() == self::MODE_ALL && !$result) {
                 // on false is enough

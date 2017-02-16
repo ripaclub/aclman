@@ -18,10 +18,8 @@ use Zend\ServiceManager\ServiceLocatorAwareTrait;
 /**
  * Class Assertion3
  */
-class Assertion3 implements AssertionInterface, ServiceLocatorAwareInterface
+class Assertion3 implements AssertionInterface
 {
-    use ServiceLocatorAwareTrait;
-
     protected $test;
 
     public function __construct($option = null)

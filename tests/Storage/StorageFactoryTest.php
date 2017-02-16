@@ -67,13 +67,11 @@ class StorageFactoryTest extends AclManTestCase
 
         ];
 
-        $this->serviceManager = new ServiceManager\ServiceManager(
-            new ServiceManagerConfig([
-                'abstract_factories' => [
-                    'AclMan\Storage\StorageFactory',
-                ],
-            ])
-        );
+        $this->serviceManager = new ServiceManager\ServiceManager([
+            'abstract_factories' => [
+                'AclMan\Storage\StorageFactory',
+            ],
+        ]);
         $this->serviceManager->setService('Config', $config);
     }
 
@@ -95,23 +93,11 @@ class StorageFactoryTest extends AclManTestCase
 
     public function testHasServiceWithoutConfig()
     {
-        $this->serviceManager = new ServiceManager\ServiceManager(
-            new ServiceManagerConfig([
-                'abstract_factories' => [
-                    'AclMan\Storage\StorageFactory',
-                ],
-            ])
-        );
-
-        $this->assertFalse($this->serviceManager->has('AclStorage'));
-
-        $this->serviceManager = new ServiceManager\ServiceManager(
-            new ServiceManagerConfig([
-                'abstract_factories' => [
-                    'AclMan\Storage\StorageFactory',
-                ],
-            ])
-        );
+        $this->serviceManager = new ServiceManager\ServiceManager([
+            'abstract_factories' => [
+                'AclMan\Storage\StorageFactory',
+            ],
+        ]);
 
         $this->serviceManager->setService('Config', []);
 

@@ -8,8 +8,8 @@
  */
 namespace AclMan\Storage;
 
-use Zend\ServiceManager\AbstractFactoryInterface;
-use Zend\ServiceManager\ServiceLocatorInterface;
+use Interop\Container\ContainerInterface;
+use Zend\ServiceManager\Factory\AbstractFactoryInterface;
 
 /**
  * Class StorageFactory
@@ -36,16 +36,13 @@ class StorageFactory implements AbstractFactoryInterface
     protected $serviceName = 'AclMan\Storage\Adapter\ArrayAdapter\ArrayAdapter';
 
     /**
-     * Determine if we can create a service with name
-     *
-     * @param ServiceLocatorInterface $serviceLocator
-     * @param $name
-     * @param $requestedName
+     * @param ContainerInterface $container
+     * @param string $requestedName
      * @return bool
      */
-    public function canCreateServiceWithName(ServiceLocatorInterface $serviceLocator, $name, $requestedName)
+    public function canCreate(ContainerInterface $container, $requestedName)
     {
-        $config = $this->getConfig($serviceLocator);
+        $config = $this->getConfig($container);
         if (empty($config)) {
             return false;
         }
@@ -56,16 +53,14 @@ class StorageFactory implements AbstractFactoryInterface
     }
 
     /**
-     * Create service with name
-     *
-     * @param ServiceLocatorInterface $serviceLocator
-     * @param $name
-     * @param $requestedName
+     * @param ContainerInterface $container
+     * @param string $requestedName
+     * @param array|null $options
      * @return mixed
      */
-    public function createServiceWithName(ServiceLocatorInterface $serviceLocator, $name, $requestedName)
+    public function __invoke(ContainerInterface $container, $requestedName, array $options = null)
     {
-        $config = $this->getConfig($serviceLocator);
+        $config = $this->getConfig($container);
 
         $configStorage = null;
         if (isset($config[$requestedName]['roles'])) {
@@ -80,23 +75,16 @@ class StorageFactory implements AbstractFactoryInterface
     }
 
     /**
-     * Get model configuration, if any
-     *
-     * @param  ServiceLocatorInterface $serviceLocator
+     * @param ContainerInterface $container
      * @return array
      */
-    protected function getConfig(ServiceLocatorInterface $serviceLocator)
+    protected function getConfig(ContainerInterface $container)
     {
         if ($this->config !== null) {
             return $this->config;
         }
 
-        if (!$serviceLocator->has('Config')) {
-            $this->config = [];
-            return $this->config;
-        }
-
-        $config = $serviceLocator->get('Config');
+        $config = $container->get('Config');
         if (!isset($config[$this->configKey])
             || !is_array($config[$this->configKey])
         ) {
